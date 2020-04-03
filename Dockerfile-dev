@@ -1,0 +1,18 @@
+FROM node:alpine AS DEPS
+
+WORKDIR /usr/src/app
+
+COPY package*.json ./
+
+RUN npm set progress=false && npm config set depth 0
+
+RUN npm i
+
+FROM DEPS AS RUNNER
+
+WORKDIR /usr/src/app
+
+RUN apt-get update
+RUN apt-get install vim curl -y
+
+CMD npm run dev
