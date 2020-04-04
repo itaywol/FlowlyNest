@@ -10,4 +10,7 @@ export class Auth {
 
   @Field({ nullable: false })
   password?: string;
+
+  @Field(type => String)
+  performerId?: string;
 }
