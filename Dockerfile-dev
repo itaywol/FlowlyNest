@@ -12,7 +12,4 @@ FROM DEPS AS RUNNER
 
 WORKDIR /usr/src/app
 
-RUN apt-get update
-RUN apt-get install vim curl -y
-
-CMD npm run dev
+CMD npm run start:dev
