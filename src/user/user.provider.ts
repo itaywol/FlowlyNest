@@ -1,6 +1,6 @@
-import { USER_MODEL, DATABASE_PROVIDER } from 'src/constants';
+import { USER_MODEL, DATABASE_PROVIDER } from '../constants';
 import { Connection } from 'mongoose';
-import { UserSchema } from 'src/schemas/user.schema';
+import { UserSchema } from 'schemas/user.schema';
 
 export const userProvider = [
   {

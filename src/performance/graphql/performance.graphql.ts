@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { User } from 'src/user/graphql/user.graphql';
+import { User } from 'user/graphql/user.graphql';
 
 @ObjectType()
 export class Performance {

@@ -9,7 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { PerformerModule } from './performer/performer.module';
 import { PerformanceModule } from './performance/performance.module';
 import { TransactionsModule } from './transactions/transactions.module';
-import { winstonConfig } from 'src/logger';
+import { winstonConfig } from './logger';
 
 @Module({
   imports: [

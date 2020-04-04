@@ -1,6 +1,6 @@
-import { PERFORMER_MODEL, DATABASE_PROVIDER } from 'src/constants';
+import { PERFORMER_MODEL, DATABASE_PROVIDER } from '../constants';
 import { Connection } from 'mongoose';
-import { PerformerSchema } from 'src/schemas/performer.schema';
+import { PerformerSchema } from 'schemas/performer.schema';
 
 export const performerProvider = [
   {

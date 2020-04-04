@@ -1,6 +1,6 @@
-import { TRANSACTION_MODEL, DATABASE_PROVIDER } from 'src/constants';
+import { TRANSACTION_MODEL, DATABASE_PROVIDER } from '../constants';
 import { Connection } from 'mongoose';
-import { TransactionSchema } from 'src/schemas/transaction.schema';
+import { TransactionSchema } from 'schemas/transaction.schema';
 
 export const transactionProvider = [
   {

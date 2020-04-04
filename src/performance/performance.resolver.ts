@@ -1,6 +1,6 @@
 import { Resolver, Query } from '@nestjs/graphql';
 import { PerformanceService } from './performance.service';
-import { Performance } from 'src/performance/graphql/performance.graphql';
+import { Performance } from 'performance/graphql/performance.graphql';
 
 @Resolver(of => Performance)
 export class PerformanceResolver {
