@@ -8,6 +8,12 @@ export class AuthResolver {
 
   @Query(returns => Auth)
   async Auth(@Args('id', { type: () => Int }) id: number): Promise<Auth> {
-    return { id: 1, username: 'itay', password: 'secret' };
+    return {
+      id: 'xxx',
+      email: 'itay',
+      password: 'secret',
+      wallet: 'mywallet',
+      tickets: 'my tickets',
+    };
   }
 }
