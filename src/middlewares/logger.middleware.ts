@@ -17,7 +17,7 @@ export class LoggerMiddleware implements NestMiddleware {
       return this.logger.info.apply(logger, args);
     };
     console.info = function(...args: any) {
-      return this.logger.verbose.apply(logger, args);
+      return this.logger.log.apply(logger, args);
     };
     console.warn = function(...args: any) {
       return this.logger.warn.apply(logger, args);

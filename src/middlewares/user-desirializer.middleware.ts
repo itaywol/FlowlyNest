@@ -10,7 +10,7 @@ export class UserDeserializerMiddleware implements NestMiddleware {
   use = async (req: Request, _res: Response, next: () => void) => {
     if ((req.session as any).passport !== undefined) {
       try {
-        req.user = await this.userService.getUser(req.session.passport.userId);
+        //        req.user = await this.userService.getUser(req.session.passport.userId);
       } catch (err) {
         if (err instanceof NotFoundException) {
           //         logoutUserFromRequest(req);

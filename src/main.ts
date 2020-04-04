@@ -35,7 +35,6 @@ function initMiddlewares(app: INestApplication) {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api');
   initMiddlewares(app);
   if (!isProduction()) {
     app.enableCors();
