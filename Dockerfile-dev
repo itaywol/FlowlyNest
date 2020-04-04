@@ -1,15 +1,9 @@
-FROM node:alpine AS DEPS
+FROM node:latest AS RUNNER
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
-
-RUN npm set progress=false && npm config set depth 0
+COPY . .
 
 RUN npm i
-
-FROM DEPS AS RUNNER
-
-WORKDIR /usr/src/app
 
 CMD npm run start:dev
