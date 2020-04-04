@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AppService } from './app.service';
 import { GraphQLModule } from '@nestjs/graphql';
-import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 import { WinstonModule } from 'nest-winston';
 import { DatabaseModule } from './database/database.module';
 import { PerformerModule } from './performer/performer.module';
@@ -19,7 +19,7 @@ import { winstonConfig } from 'src/logger';
       playground: true,
       autoSchemaFile: true,
     }),
-    AuthModule,
+    UserModule,
     DatabaseModule,
     PerformerModule,
     PerformanceModule,

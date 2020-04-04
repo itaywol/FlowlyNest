@@ -1,5 +1,5 @@
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Auth } from 'src/auth/graphql/auth.graphql';
+import { User } from 'src/user/graphql/user.graphql';
 
 @ObjectType()
 export class Performance {
@@ -15,6 +15,6 @@ export class Performance {
   @Field(type => String, { nullable: false })
   date: string;
 
-  @Field(type => [Auth], { nullable: true })
-  attending: [Auth];
+  @Field(type => [User], { nullable: true })
+  attending: [User];
 }
