@@ -22,13 +22,18 @@ export class UserInput {
 export class UserResolver {
   constructor(private userService: UserService) {}
 
-  @Mutation(returns => User)
+  @Mutation(returns => [User])
   async registerUser(@Args('data') data: UserInput): Promise<User> {
-    console.debug('help');
     const user = await this.userService.registerUser({
       email: data.email,
       password: data.password,
     });
-    return { ...user, wallet: 'test', tickets: 'test' };
+    const printUser = {
+      ...user,
+      wallet: 'test',
+      tickets: 'test',
+    };
+    console.log(JSON.stringify(printUser));
+    return printUser;
   }
 }

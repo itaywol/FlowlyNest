@@ -15,7 +15,7 @@ import { winstonConfig } from './logger';
   imports: [
     WinstonModule.forRoot(winstonConfig),
     GraphQLModule.forRoot({
-      debug: false,
+      debug: true,
       playground: true,
       autoSchemaFile: true,
     }),

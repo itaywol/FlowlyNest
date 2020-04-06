@@ -1,6 +1,5 @@
 import * as mongoose from 'mongoose';
 export const UserSchema = new mongoose.Schema({
-  _id: mongoose.Types.ObjectId,
   email: { type: String, required: true },
   password: { type: String, required: true },
   firstName: { type: String, required: false },

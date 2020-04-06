@@ -9,23 +9,7 @@ export function formatIp(req: Request) {
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
-  constructor(@Inject('winston') private readonly logger: Logger) {
-    console.debug = function(...args: any) {
-      return this.logger.debug.apply(logger, args);
-    };
-    console.log = function(...args: any) {
-      return this.logger.info.apply(logger, args);
-    };
-    console.info = function(...args: any) {
-      return this.logger.log.apply(logger, args);
-    };
-    console.warn = function(...args: any) {
-      return this.logger.warn.apply(logger, args);
-    };
-    console.error = function(...args: any) {
-      return this.logger.error.apply(logger, args);
-    };
-  }
+  constructor(@Inject('winston') private readonly logger: Logger) {}
 
   use(req: Request, res: Response, next: Function) {
     if (isProduction()) {
@@ -46,7 +30,10 @@ export class LoggerMiddleware implements NestMiddleware {
     this.logger.verbose(
       `${formatIp(req)} - ${req.method} - ${req.baseUrl +
         (JSON.stringify(req.body) !== '{}'
-          ? ' - ' + JSON.stringify(req.body)
+          ? ' - ' +
+            JSON.stringify(
+              req.body.operationName === 'IntrospectionQuery' ? {} : req.body,
+            )
           : '')}`,
     );
     next();
