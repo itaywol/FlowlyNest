@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as expressSession from 'express-session';
 import * as passport from 'passport';
@@ -12,6 +13,7 @@ export function isProduction(): boolean {
 }
 
 function initMiddlewares(app: INestApplication) {
+  app.enableCors({ origin: '*', credentials: true });
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.use(
@@ -20,6 +22,7 @@ function initMiddlewares(app: INestApplication) {
       store: new MongoStore({
         stringify: false,
         url: process.env.MONGO_URI,
+        collection: 'authSessions',
       }),
       resave: false,
       saveUninitialized: false,

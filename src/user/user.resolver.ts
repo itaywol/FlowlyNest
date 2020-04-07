@@ -6,34 +6,36 @@ import {
   Args,
   InputType,
   Field,
+  Context,
+  GraphQLExecutionContext,
 } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { User } from './graphql/user.graphql';
-
-@InputType()
-export class UserInput {
-  @Field()
-  email: string;
-  @Field()
-  password: string;
-}
+import { User, LoginInput, UserInput } from './graphql/user.graphql';
 
 @Resolver(of => User)
 export class UserResolver {
   constructor(private userService: UserService) {}
 
-  @Mutation(returns => [User])
+  @Mutation(returns => User)
   async registerUser(@Args('data') data: UserInput): Promise<User> {
-    const user = await this.userService.registerUser({
-      email: data.email,
-      password: data.password,
+    let createdUser: User | undefined;
+    try {
+      createdUser = await this.userService.registerUser(data);
+    } catch (error) {
+      console.error(error.message);
+    }
+    console.log(JSON.stringify(createdUser));
+    return createdUser;
+  }
+
+  @Query(returns => String)
+  async loginUser(@Context() context: any, @Args('data') data: LoginInput) {
+    context.res.cookie('test_cookie', 'safjdufsjdflksjdf908usdf', {
+      httpOnly: true,
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
-    const printUser = {
-      ...user,
-      wallet: 'test',
-      tickets: 'test',
-    };
-    console.log(JSON.stringify(printUser));
-    return printUser;
+
+    return 'hello';
   }
 }

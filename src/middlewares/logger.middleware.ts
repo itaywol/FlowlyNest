@@ -27,15 +27,16 @@ export class LoggerMiddleware implements NestMiddleware {
   };
 
   devLogger = (req: Request, _res: Response, next: Function) => {
-    this.logger.verbose(
-      `${formatIp(req)} - ${req.method} - ${req.baseUrl +
-        (JSON.stringify(req.body) !== '{}'
-          ? ' - ' +
-            JSON.stringify(
-              req.body.operationName === 'IntrospectionQuery' ? {} : req.body,
-            )
-          : '')}`,
-    );
+    if (req.body.operationName !== 'IntrospectionQuery')
+      this.logger.verbose(
+        `${formatIp(req)} - ${req.method} - ${req.baseUrl +
+          (JSON.stringify(req.body) !== '{}'
+            ? ' - ' +
+              JSON.stringify(
+                req.body.operationName === 'IntrospectionQuery' ? {} : req.body,
+              )
+            : '')}`,
+      );
     next();
   };
 }

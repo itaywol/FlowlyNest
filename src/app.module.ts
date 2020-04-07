@@ -15,12 +15,18 @@ import { winstonConfig } from './logger';
   imports: [
     WinstonModule.forRoot(winstonConfig),
     GraphQLModule.forRoot({
-      debug: true,
-      playground: true,
+      debug: false,
+      playground: {
+        settings: {
+          'request.credentials': 'include',
+        },
+      },
       autoSchemaFile: true,
+      cors: false,
+      context: ({ req, res, connection }) => ({ req, res, connection }),
     }),
-    UserModule,
     DatabaseModule,
+    UserModule,
     PerformerModule,
     PerformanceModule,
     TransactionsModule,

@@ -1,9 +1,9 @@
-import { Field, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Int, ObjectType, Scalar, InputType } from '@nestjs/graphql';
 
 @ObjectType()
 export class User {
   @Field(type => String)
-  _id: string;
+  _id: any;
 
   @Field(type => String, { nullable: false })
   email: string;
@@ -31,4 +31,20 @@ export class User {
   //TODO: create performance object
   @Field(type => String, { nullable: true })
   tickets: string;
+}
+
+@InputType()
+export class UserInput {
+  @Field()
+  email: string;
+  @Field()
+  password: string;
+}
+
+@InputType()
+export class LoginInput {
+  @Field()
+  email: string;
+  @Field()
+  password: string;
 }

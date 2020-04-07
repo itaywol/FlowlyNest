@@ -1,11 +1,7 @@
 import * as mongoose from 'mongoose';
 import { DATABASE_PROVIDER } from '../constants';
+import { MongooseModule } from '@nestjs/mongoose';
 
 export const databaseProviders = [
-  {
-    provide: DATABASE_PROVIDER,
-    useFactory: (): Promise<typeof mongoose> => {
-      return mongoose.connect(process.env.MONGO_URI);
-    },
-  },
+  MongooseModule.forRoot(process.env.MONGO_URI),
 ];
