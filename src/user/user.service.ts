@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User, LoginInput, UserInput } from './graphql/user.graphql';
+import { User, CredentialsInput  } from './graphql/user.input';
 import { Model, Document, Types, Schema } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from 'schemas/user.schema';
@@ -19,7 +19,7 @@ export interface ReturnUser {
 export class UserService {
   constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
 
-  public async registerUser(createUser: UserInput): Promise<User> {
+  public async registerUser(createUser: CredentialsInput): Promise<User> {
     const createdUser = new this.userModel(createUser);
     let user: UserDocument | undefined;
     try {
@@ -31,7 +31,7 @@ export class UserService {
   }
 
   public async validateUser(
-    loginData: LoginInput,
+    loginData: CredentialsInput,
   ): Promise<UserDocument | undefined> {
     let userAttemptLogin: UserDocument | undefined;
     if (loginData.email) {

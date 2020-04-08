@@ -22,8 +22,7 @@ import { winstonConfig } from './logger';
         },
       },
       autoSchemaFile: true,
-      cors: false,
-      context: ({ req, res, connection }) => ({ req, res, connection }),
+      cors: false
     }),
     DatabaseModule,
     UserModule,
