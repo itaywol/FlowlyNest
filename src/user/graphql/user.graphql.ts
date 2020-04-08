@@ -31,6 +31,12 @@ export class User {
   //TODO: create performance object
   @Field(type => String, { nullable: true })
   tickets: string;
+
+  @Field(type => Number, { nullable: false })
+  lastSeenAt: number;
+
+  @Field(type => Boolean, { nullable: false })
+  enabled: boolean;
 }
 
 @InputType()
@@ -48,3 +54,4 @@ export class LoginInput {
   @Field()
   password: string;
 }
+

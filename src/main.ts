@@ -19,6 +19,7 @@ function initMiddlewares(app: INestApplication) {
   app.use(
     expressSession({
       secret: process.env.SESSION_SECRET,
+      name: 'performa_auth',
       store: new MongoStore({
         stringify: false,
         url: process.env.MONGO_URI,
@@ -30,6 +31,8 @@ function initMiddlewares(app: INestApplication) {
         maxAge: 30 * 24 * 60 * 60 * 1000,
         httpOnly: true,
         secure: isProduction(),
+        sameSite: true,
+        domain: process.env.PUBLIC_DOMAIN || 'localhost',
       },
     }),
   );

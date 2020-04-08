@@ -1,15 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { User, LoginInput, UserInput } from './graphql/user.graphql';
 import { Model, Document, Types, Schema } from 'mongoose';
-import { USER_MODEL } from '../constants';
-import { User } from './graphql/user.graphql';
 import { InjectModel } from '@nestjs/mongoose';
-
-export interface UserDoc extends Document {
-  email: string;
-  password: string;
-  wallet: string;
-  tickets: string;
-}
+import { UserDocument } from 'schemas/user.schema';
 
 export interface CreateUserDto {
   email: string;
@@ -21,17 +14,53 @@ export interface ReturnUser {
   email: string;
   password: string;
 }
+
 @Injectable()
 export class UserService {
-  constructor(@InjectModel('User') private userModel: Model<UserDoc>) {}
-  public async registerUser(createUser: CreateUserDto): Promise<User> {
+  constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
+
+  public async registerUser(createUser: UserInput): Promise<User> {
     const createdUser = new this.userModel(createUser);
-    let user: UserDoc | undefined;
+    let user: UserDocument | undefined;
     try {
       user = await createdUser.save();
     } catch (error) {
       console.error(error.message);
     }
     return user;
+  }
+
+  public async validateUser(
+    loginData: LoginInput,
+  ): Promise<UserDocument | undefined> {
+    let userAttemptLogin: UserDocument | undefined;
+    if (loginData.email) {
+      userAttemptLogin = await this.userModel.findOne({
+        lowercaseEmail: loginData.email.toLowerCase(),
+      });
+    }
+
+    if (userAttemptLogin && userAttemptLogin.enabled === false) {
+      userAttemptLogin = undefined;
+    }
+
+    if (!userAttemptLogin) return undefined;
+
+    let isMatch = false;
+    try {
+      isMatch = await userAttemptLogin.checkPassword(loginData.password);
+    } catch (error) {
+      return undefined;
+    }
+
+    if (isMatch) {
+      const result = userAttemptLogin;
+      delete result.password;
+      userAttemptLogin.lastSeenAt = Date.now();
+      userAttemptLogin.save();
+      return result;
+    }
+
+    return undefined;
   }
 }
