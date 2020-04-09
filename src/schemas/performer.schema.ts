@@ -1,4 +1,14 @@
-import * as mongoose from 'mongoose';
+import { Document, Schema, Types } from 'mongoose';
+
+export interface PerformerDocument extends Document {
+  password: string;
+  lowercaseUsername: string;
+  lowercaseEmail: string;
+  passwordReset?: {
+    token: string;
+    expiration: Date;
+  };
+}
 
 const generateStreamKey = (length: number) => {
   return (
@@ -9,9 +19,9 @@ const generateStreamKey = (length: number) => {
       .substr(0, length)
   );
 };
-export const PerformerSchema = new mongoose.Schema({
-  _id: mongoose.Types.ObjectId,
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+export const PerformerSchema = new Schema({
+  _id: Types.ObjectId,
+  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
   stream: {
     title: { type: String, required: true, default: 'my stream' },
     secretKey: {
@@ -22,7 +32,7 @@ export const PerformerSchema = new mongoose.Schema({
   },
   performances: [
     {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Performance',
       required: false,
     },

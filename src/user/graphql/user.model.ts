@@ -2,16 +2,11 @@ import { ObjectType, InputType, Field } from '@nestjs/graphql';
 
 @ObjectType()
 export class UserDto {
-  @Field(type => String)
   email: string;
-  @Field(type => String)
   nickName: string;
-  @Field(type => String)
   firstName: string;
-  @Field(type => String)
   lastName: string;
   phoneNumber?: string;
-  @Field(type => String)
   _id: string;
 
   //TODO: change to performer object
