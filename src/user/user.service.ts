@@ -1,5 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { User, CredentialsInput  } from './graphql/user.input';
+import { CredentialsInput } from './graphql/user.input';
+import { User } from './graphql/user.model';
 import { Model, Document, Types, Schema } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from 'schemas/user.schema';

@@ -2,17 +2,15 @@ import {
   Resolver,
   Query,
   Mutation,
-  Int,
   Args,
-  InputType,
-  Field,
-  Context,
   GraphQLExecutionContext,
+  Context,
 } from '@nestjs/graphql';
 import { UserService } from './user.service';
-import { User, CredentialsInput, UserDto } from './graphql/user.input';
+import { CredentialsInput } from './graphql/user.input';
+import { User, UserDto } from './graphql/user.model';
 import { UserDocument } from 'schemas/user.schema';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Req, Inject } from '@nestjs/common';
 import { Logger } from 'winston';
 
@@ -25,7 +23,7 @@ export class UserResolver {
 
   @Mutation(returns => String)
   async register(
-    @Req() req: Request,
+    @Context() context: { req: Request; res: Response },
     @Args('data') data: CredentialsInput,
   ): Promise<User> {
     let createdUser: User | undefined;
@@ -34,26 +32,28 @@ export class UserResolver {
     } catch (error) {
       console.error(error.message);
     }
-    req.session.user = { id: createdUser._id };
+    context.req.session.user = createdUser;
     return createdUser._id;
   }
 
   @Query(returns => String)
   async login(
-    @Req() req: Request,
+    @Context() context: { req: Request; res: Response },
     @Args('data') data: CredentialsInput,
   ): Promise<string | undefined> {
     const user: UserDocument = await this.userService.validateUser(data);
     if (!user) return undefined;
 
-    req.session.user = { id: user._id };
+    context.req.session.user = user;
     return user._id;
   }
 
   @Query(returns => Boolean)
-  async logout(@Req() req: Request): Promise<boolean> {
+  async logout(
+    @Context() context: { req: Request; res: Response },
+  ): Promise<boolean> {
     try {
-      req.session.destroy(err => {
+      context.req.session.destroy(err => {
         throw err;
       });
     } catch (error) {
@@ -64,12 +64,18 @@ export class UserResolver {
     return true;
   }
 
-  @Query(returns => UserDto, {nullable: true})
-  async get(@Req() req: Request): Promise<boolean> {
+  @Query(returns => UserDto, { nullable: true })
+  async get(
+    @Context() context: { req: Request; res: Response },
+  ): Promise<boolean> {
     let result = undefined;
 
-    if (req.session !== undefined) {
-      result = req.session.user;
+    if (context.req.session) {
+      try {
+        result = context.req.session.user;
+      } catch (error) {
+        console.error(error.message);
+      }
     }
 
     return result;
