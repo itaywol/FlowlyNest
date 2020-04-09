@@ -38,7 +38,7 @@ export const UserSchema = new Schema(
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
     phoneNumber: { type: String, required: false },
-    performerId: {
+    performer: {
       type: Schema.Types.ObjectId,
       ref: 'Performer',
       required: false,
