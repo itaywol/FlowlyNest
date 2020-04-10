@@ -1,6 +1,6 @@
 import { Model, model, Schema, Query, Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import { User } from '../user/graphql/user.model';
+import { User } from 'user/interfaces/user.interface';
 export interface UserDocument extends User, Document {
   password: string;
   lowercaseUsername: string;

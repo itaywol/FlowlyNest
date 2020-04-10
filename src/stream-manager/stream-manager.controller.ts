@@ -1,4 +1,13 @@
-import { Controller, Post, Get, Body, Res, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Res,
+  Req,
+  Session,
+  HttpException,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 
 // POST data interface for requests from rtmp server
@@ -49,8 +58,10 @@ export class StreamManagerController {
   // Get route to check if user is authenticated
   // For nginx auth_request purposes
   @Get('auth')
-  public async auth(@Req() req: Request, @Res() res: Response) {
-    if (req.session.user) return res.status(200).send();
-    return res.status(401).send();
+  public async auth(@Session() session: any) {
+    if (process.env.STREAM_REQUIRES_AUTH === 'false')
+      throw new HttpException('Ok', 200);
+    if (session.user) return 'ok';
+    throw new HttpException('Unauthorized', 401);
   }
 }

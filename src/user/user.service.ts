@@ -1,26 +1,14 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { CredentialsInput } from './graphql/user.input';
-import { User } from './graphql/user.model';
-import { Model, Document, Types, Schema } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { UserDocument } from 'schemas/user.schema';
-
-export interface CreateUserDto {
-  email: string;
-  password: string;
-}
-
-export interface ReturnUser {
-  _id: string;
-  email: string;
-  password: string;
-}
+import { CreateUserDTO, User } from 'user/interfaces/user.interface';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
 
-  public async registerUser(createUser: CredentialsInput): Promise<User> {
+  public async registerUser(createUser: CreateUserDTO): Promise<User> {
     const createdUser = new this.userModel(createUser);
     let user: UserDocument | undefined;
     try {
@@ -32,9 +20,10 @@ export class UserService {
   }
 
   public async validateUser(
-    loginData: CredentialsInput,
+    loginData: CreateUserDTO,
   ): Promise<UserDocument | undefined> {
     let userAttemptLogin: UserDocument | undefined;
+    console.log(JSON.stringify(loginData));
     if (loginData.email) {
       userAttemptLogin = await this.userModel.findOne({
         lowercaseEmail: loginData.email.toLowerCase(),

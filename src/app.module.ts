@@ -10,6 +10,7 @@ import { PerformanceModule } from './performance/performance.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { winstonConfig } from './logger';
 import { StreamManagerModule } from './stream-manager/stream-manager.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { StreamManagerModule } from './stream-manager/stream-manager.module';
     PerformanceModule,
     TransactionsModule,
     StreamManagerModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
