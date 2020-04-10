@@ -13,7 +13,7 @@ export interface RTMPData {
   name: string;
 }
 
-@Controller('sm')
+@Controller('stream')
 export class StreamManagerController {
   // On Stream Begin Hook
   // Rewrites stream names and update current live streams
@@ -22,7 +22,7 @@ export class StreamManagerController {
   // TODO: get the performer id of that stream key owner
   // TODO: redirect to the stream url + performer mongoId
   // TODO: if authentication failed should return response 401 to prevent user from streaming
-  @Post('stream_start')
+  @Post('start')
   public async streamStart(
     @Req() req: Request,
     @Res() res: Response,
@@ -40,7 +40,7 @@ export class StreamManagerController {
 
   // On Stream End Hook
   // No response needed
-  @Post('stream_end')
+  @Post('end')
   public async streamEnd(@Body() data: RTMPData) {
     const name: string | undefined = data.name;
     console.log(`${name} has stopped streaming`);
