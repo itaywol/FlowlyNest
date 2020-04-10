@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
-import { PerformanceResolver } from './performance.resolver';
 import { PerformanceService } from './performance.service';
+import { PerformanceController } from './performance.controller';
 
 @Module({
-  providers: [PerformanceResolver, PerformanceService]
+  providers: [PerformanceService],
+  controllers: [PerformanceController],
 })
 export class PerformanceModule {}

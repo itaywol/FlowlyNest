@@ -1,11 +1,4 @@
-import {
-  Resolver,
-  Query,
-  Mutation,
-  Args,
-  GraphQLExecutionContext,
-  Context,
-} from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UserService } from './user.service';
 import { CredentialsInput } from './graphql/user.input';
 import { User, UserDto } from './graphql/user.model';

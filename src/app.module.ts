@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { AppService } from './app.service';
-import { GraphQLModule } from '@nestjs/graphql';
 import { UserModule } from './user/user.module';
 import { WinstonModule } from 'nest-winston';
 import { DatabaseModule } from './database/database.module';
@@ -15,21 +14,6 @@ import { StreamManagerModule } from './stream-manager/stream-manager.module';
 @Module({
   imports: [
     WinstonModule.forRoot(winstonConfig),
-    GraphQLModule.forRoot({
-      debug: false,
-      context: ({ req, res, connection }) => ({
-        req,
-        res,
-        connection,
-      }),
-      playground: {
-        settings: {
-          'request.credentials': 'include',
-        },
-      },
-      autoSchemaFile: true,
-      cors: false,
-    }),
     DatabaseModule,
     UserModule,
     PerformerModule,
