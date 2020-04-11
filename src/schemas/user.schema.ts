@@ -1,9 +1,11 @@
 import { Model, model, Schema, Query, Document } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User } from 'user/interfaces/user.interface';
+import { Performer } from 'performer/interfaces/performer.interface';
+
 export interface UserDocument extends User, Document {
+  performer: Performer;
   password: string;
-  lowercaseUsername: string;
   lowercaseEmail: string;
   passwordReset?: {
     token: string;
@@ -37,6 +39,7 @@ export const UserSchema = new Schema(
     password: { type: String, required: true },
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
+    nickName: { type: String, required: true, unique: true },
     phoneNumber: { type: String, required: false },
     performer: {
       type: Schema.Types.ObjectId,
@@ -49,6 +52,7 @@ export const UserSchema = new Schema(
     },
     tickets: { type: Schema.Types.ObjectId, ref: 'Performance' },
     lastSeenAt: { type: Date, default: Date.now() },
+    enabled: { type: Boolean, default: false },
   },
   { timestamps: true },
 );

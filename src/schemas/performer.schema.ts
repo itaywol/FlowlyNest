@@ -1,34 +1,32 @@
 import { Document, Schema, Types } from 'mongoose';
+import { Performer } from 'performer/interfaces/performer.interface';
+import { uidSync } from 'uid-ts';
 
-export interface PerformerDocument extends Document {
-  password: string;
-  lowercaseUsername: string;
-  lowercaseEmail: string;
-  passwordReset?: {
-    token: string;
-    expiration: Date;
-  };
+export interface PerformerDocument extends Performer, Document {
+  _id: any;
+  live: boolean;
 }
 
-const generateStreamKey = (length: number) => {
-  return (
-    'perform_' +
-    Math.random()
-      .toString(36)
-      .replace(/[^a-z]+/g, '')
-      .substr(0, length)
-  );
-};
+function GenerateStreamKey(length: number) {
+  const enc: string = uidSync(length);
+  return `${process.env.STREAM_KEYS_PREFIX || 'Performa'}_${enc}`;
+}
+
 export const PerformerSchema = new Schema({
-  _id: Types.ObjectId,
-  userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  user: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    unique: true,
+  },
   stream: {
     title: { type: String, required: true, default: 'my stream' },
     secretKey: {
       type: String,
       required: true,
-      default: () => generateStreamKey(32),
+      default: GenerateStreamKey(48),
     },
+    live: { type: Boolean, default: false },
   },
   performances: [
     {
@@ -38,3 +36,7 @@ export const PerformerSchema = new Schema({
     },
   ],
 });
+
+PerformerSchema.statics.GenerateStreamKey = function(length: number): string {
+  return GenerateStreamKey(length);
+};

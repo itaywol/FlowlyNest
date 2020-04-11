@@ -10,5 +10,9 @@ import { PerformerController } from './performer.controller';
   ],
   providers: [PerformerService],
   controllers: [PerformerController],
+  exports: [
+    PerformerService,
+    MongooseModule.forFeature([{ name: 'Performer', schema: PerformerSchema }]),
+  ],
 })
 export class PerformerModule {}

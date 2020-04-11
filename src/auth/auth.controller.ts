@@ -22,14 +22,7 @@ export class AuthController {
     @Session() session: any,
     @Body() data: CreateUserDTO,
   ): Promise<string> {
-    let createdUser: User | undefined;
-    console.log(data);
-
-    try {
-      createdUser = await this.userService.registerUser(data);
-    } catch (error) {
-      this.logger.error(error.message);
-    }
+    const createdUser: User = await this.userService.registerUser(data);
 
     if (!createdUser) throw new HttpException('User Already Exists', 401);
 
@@ -43,16 +36,10 @@ export class AuthController {
     @Session() session: any,
     @Body() data: CreateUserDTO,
   ): Promise<string> {
-    let loginUser: User | undefined;
-
-    try {
-      loginUser = await this.userService.validateUser(data);
-    } catch (error) {
-      this.logger.error(error.message);
-    }
+    const loginUser = await this.userService.validateUser(data);
 
     if (!loginUser)
-      throw new HttpException('Email or Password not Correcgt', 404);
+      throw new HttpException('Email or Password not Correct', 404);
 
     session.user = loginUser;
     return loginUser._id;
