@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "performa-273910",
+  "private_key_id": "1944ebf040556c6f1d3212f22a9eadfeec210cf8",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC67pR/0Z8+8Thw\n/k/uN3k2G1MGQNppARjMyPs3BPh8I/ix0kiJ4/Z9gtuP9FePm9EOZFEeTeHwT0H2\nlZbm2msUyVf5baBt/k9ZdAXVnaedoFsFwAYlo22xGJeYvMgpmrsNuanpZ8pVpfOY\nVBxZaOtEyM+n+nJep9406ZBsL3sf2paStk1LbOeXpc9+kSKFX5YIJkT9Ps3uxiob\noBtTa/1AEJXIQuh+9OZmu+q0fFl9zYHbUbPFdzzWuPTUjhOETZhlcH4jRH8E9x9I\nQ3rnSTpYjIXhzzezNq7my91LPDkabvFZNa1sR6WyiFLdHnFnlEg+nckvj1EhHa1d\nVFSgi971AgMBAAECggEAGUNuNA9yAgaFdhaWBIq1vyoWiz/6OfppI3VpfN2XRuZw\n/CNVz2D3lViOm5gjuf0OgMSZBqCdpPspMzizUhQkfa+FIWjUp5juQ2zVRFylZGhh\ndNenXQXcfh87OcFlxzhUsxMBE3zbUROiZiy+lMIubbeQAlKW4L5iNGzOf83eSjG7\nmEKFOVja9zmCA+29QHdV+qtPeJsb2dB3GWKqoqrMqHrjFot6ypy7yNSaX2pkqTDo\nFah2zfxpCKWLJOto0hzWha/FVvIEK2jPV0aSSWfVNdp0vgE6Op2GI3DvtEY8CJBo\nw63yADL5m3ucZq3vQf3Sd0XH9RmzzpgI0NZBP25tfwKBgQD++g2cVrKjqU8VJBQv\nnTyPQNz4nkeogZ8nyhLU/+OZd86+Lyo5aNOa3pcGutx71Xkcvj4xP9KDhz8OfUoJ\n8qmGQFM6oerDWBFmV4kCRRZIcAKEkDb7w1fI/Ga2vonBSI4hjH4id8oKegy8QltU\ntcEQ2+dEEfoL8no7K57djbSFzwKBgQC7rp88TUecqoraR2FsS0ge1J8fRltdQoVO\n3jh6Ips/0s9zgOq/Qon9c/LpPpvNgMiMe4yv+Af1GsdXmBgPIdMRfTeTDhCZmciI\nW0NcC1I0hlS9G8I0UhwpHwpANGZY93uaSG5KzOJoJmXFEBIBSrEGcLCsxiun74h0\nARxpL2DD+wKBgQC4Ydq103wbHbQydYSjafEBJsakgtEO6a1N+LLllKXhtOGsZi8C\nlOtwcsaD91y5sAWE443Vz3FL6+GNeMyxpOkyTBHjtHMwD9+FQoexPISAnX80nZUl\nOn2gueUNAXxcaTtex1nvUvCn4tqSyOmCuGyE5IC4mMdZHF+HqmOXk4GXwQKBgG+p\nKcXHuJZmBKxvEXBLrcHiADWsN0lZ/VP59CH+Gt2y/4eZqJBX9x8a7+eDP1DZkPe7\nve0npRxXbUgZDh9aoWfjVsAf+xJXoy41FfNaLPNhBGNqc3WLcIOqmv+t7UJ7I0ec\nVjocgYszZRMER6ILHR1WyFZSpMCKS2WxD4UpEeonAoGBAPU0eaaWtg1GK/AlDjC1\nqGCEAPZxNvjyvg/EJp0FW/hDsVBf2Bzq5yI9U0rx+mU29yNbS0s3dXrABbfVQ1cY\n3HLgxc7qeDsjvrsxi3zbbJyGMvZWljkvSmTBrfFJDM183I6+MdPt66ypoGg/GLBa\nUCbe7YebfxKb28fL9nS0xIP8\n-----END PRIVATE KEY-----\n",
+  "client_email": "performa-dev@performa-273910.iam.gserviceaccount.com",
+  "client_id": "110816981507104776005",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/performa-dev%40performa-273910.iam.gserviceaccount.com"
+}

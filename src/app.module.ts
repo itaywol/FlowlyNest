@@ -11,6 +11,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 import { winstonConfig } from './logger';
 import { StreamManagerModule } from './stream-manager/stream-manager.module';
 import { AuthModule } from './auth/auth.module';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AuthModule } from './auth/auth.module';
     TransactionsModule,
     StreamManagerModule,
     AuthModule,
+    FileUploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],
