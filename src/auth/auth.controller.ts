@@ -5,6 +5,10 @@ import {
   Post,
   HttpException,
   Session,
+  Get,
+  Req,
+  Next,
+  Res,
 } from '@nestjs/common';
 import {
   CreateUserDTO,
@@ -13,6 +17,7 @@ import {
 } from 'user/interfaces/user.interface';
 import { UserService } from 'user/user.service';
 import { Logger } from 'winston';
+import { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -49,5 +54,15 @@ export class AuthController {
     session.user = loginUser;
     delete session.user.password;
     return loginUser._id;
+  }
+
+  @Get('logout')
+  async logoutUser(@Session() session: any, @Res() res: Response) {
+    session.destroy();
+    res.cookie(process.env.SESSION_COOKIE_NAME || 'performa_auth', '', {
+      maxAge: 0,
+      httpOnly: true,
+    });
+    return res.redirect('/');
   }
 }
