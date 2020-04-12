@@ -7,6 +7,7 @@ export interface UserDocument extends User, Document {
   performer: Performer;
   password: string;
   lowercaseEmail: string;
+  lowercaseNickName: string;
   passwordReset?: {
     token: string;
     expiration: Date;
@@ -35,11 +36,13 @@ export const UserSchema = new Schema(
     lowercaseEmail: {
       type: String,
       unique: true,
+      select: false,
     },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: false },
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
     nickName: { type: String, required: true, unique: true },
+    lowercaseNickName: { type: String, unique: true, select: false },
     phoneNumber: { type: String, required: false },
     performer: {
       type: Schema.Types.ObjectId,
@@ -61,6 +64,7 @@ UserSchema.pre<UserDocument>('save', function(next) {
   const user = this;
 
   user.lowercaseEmail = user.email.toLowerCase();
+  user.lowercaseNickName = user.nickName.toLowerCase();
 
   // Make sure not to rehash the password if it is already hashed
   if (!user.isModified('password')) {
@@ -90,6 +94,12 @@ UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function(next) {
     this.update(
       {},
       { $set: { lowercaseEmail: updateFields.email.toLowerCase() } },
+    );
+  }
+  if (updateFields.nickName) {
+    this.update(
+      {},
+      { $set: { lowercaseNickName: updateFields.nickName.toLowerCase() } },
     );
   }
 

@@ -11,9 +11,20 @@ export interface User {
   performer: Performer;
   lastSeenAt: number;
 }
+export interface LoginUserDTO {
+  email: string;
+  password: string;
+}
 
 export interface CreateUserDTO {
   email: string;
   password: string;
   nickName: string;
+}
+
+export interface UpdateUserDTO {
+  email: string;
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
 }

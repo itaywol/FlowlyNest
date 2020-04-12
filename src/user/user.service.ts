@@ -2,7 +2,12 @@ import { Injectable, HttpException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from 'schemas/user.schema';
-import { CreateUserDTO, User } from 'user/interfaces/user.interface';
+import {
+  CreateUserDTO,
+  User,
+  UpdateUserDTO,
+  LoginUserDTO,
+} from 'user/interfaces/user.interface';
 import { PerformerService } from 'performer/performer.service';
 import { PerformerDocument } from 'schemas/performer.schema';
 
@@ -23,19 +28,25 @@ export class UserService {
       user = await createdUser.save();
     } catch (error) {
       console.error(error.message);
+      throw new HttpException(
+        'Error creating user or user already exists',
+        401,
+      );
     }
     return user;
   }
 
   public async validateUser(
-    loginData: CreateUserDTO,
+    loginData: LoginUserDTO,
   ): Promise<UserDocument | undefined> {
     let userAttemptLogin: UserDocument | undefined;
 
     if (loginData.email) {
-      userAttemptLogin = await this.userModel.findOne({
-        lowercaseEmail: loginData.email.toLowerCase(),
-      });
+      userAttemptLogin = await this.userModel
+        .findOne({
+          lowercaseEmail: loginData.email.toLowerCase(),
+        })
+        .select('+password');
     }
 
     if (userAttemptLogin && userAttemptLogin.enabled === false) {
@@ -83,7 +94,6 @@ export class UserService {
         const performerModel: PerformerDocument = await this.performerService.makeUserPerformer(
           findUser._id,
         );
-        console.log(performerModel);
         findUser.performer = performerModel._id;
         await findUser.save();
         return findUser;
@@ -93,5 +103,17 @@ export class UserService {
     }
 
     return findUser;
+  }
+
+  async updateUser(_id: string, updateUserData: UpdateUserDTO): Promise<User> {
+    const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
+      _id,
+      updateUserData,
+      { new: true },
+    );
+
+    if (!updateUser) throw new HttpException('User not found', 404);
+
+    return updateUser;
   }
 }

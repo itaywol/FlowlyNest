@@ -6,7 +6,11 @@ import {
   HttpException,
   Session,
 } from '@nestjs/common';
-import { CreateUserDTO, User } from 'user/interfaces/user.interface';
+import {
+  CreateUserDTO,
+  User,
+  LoginUserDTO,
+} from 'user/interfaces/user.interface';
 import { UserService } from 'user/user.service';
 import { Logger } from 'winston';
 
@@ -27,6 +31,7 @@ export class AuthController {
     if (!createdUser) throw new HttpException('User Already Exists', 401);
 
     session.user = createdUser;
+    delete session.user.password;
 
     return createdUser._id;
   }
@@ -34,7 +39,7 @@ export class AuthController {
   @Post('login')
   async loginUser(
     @Session() session: any,
-    @Body() data: CreateUserDTO,
+    @Body() data: LoginUserDTO,
   ): Promise<string> {
     const loginUser = await this.userService.validateUser(data);
 
@@ -42,6 +47,7 @@ export class AuthController {
       throw new HttpException('Email or Password not Correct', 404);
 
     session.user = loginUser;
+    delete session.user.password;
     return loginUser._id;
   }
 }
