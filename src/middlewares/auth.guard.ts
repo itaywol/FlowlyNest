@@ -18,11 +18,8 @@ export class AuthGuard implements CanActivate {
     const id: string = request.params.id || request.body.id || request.query.id;
 
     const authenticatedFlag = request.session.user !== undefined;
-    console.log(authenticatedFlag);
     if (!authenticatedFlag) return false;
     // If resource requires personalization then compare possible ids with req session id , if not then its ok continue
-    console.log(typeof id);
-    console.log(typeof request.session.user._id);
     const personalizedFlag =
       personalized && personalized === true
         ? id == request.session.user._id

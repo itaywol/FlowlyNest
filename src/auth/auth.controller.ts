@@ -9,6 +9,7 @@ import {
   Req,
   Next,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   CreateUserDTO,
@@ -18,6 +19,7 @@ import {
 import { UserService } from 'user/user.service';
 import { Logger } from 'winston';
 import { Request, Response } from 'express';
+import { AuthGuard } from 'middlewares/auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -54,6 +56,12 @@ export class AuthController {
     session.user = loginUser;
     delete session.user.password;
     return loginUser._id;
+  }
+
+  @Post('validate')
+  @UseGuards(AuthGuard)
+  async validate(): Promise<boolean> {
+    return true;
   }
 
   @Get('logout')
