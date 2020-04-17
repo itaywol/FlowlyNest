@@ -21,6 +21,7 @@ export class UserController {
   @Get()
   @UseGuards(AuthGuard)
   public async myUser(@Session() session: any): Promise<User> {
+    delete session.user.password;
     return await session.user;
   }
 
