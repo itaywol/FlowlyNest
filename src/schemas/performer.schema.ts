@@ -4,7 +4,14 @@ import { uidSync } from 'uid-ts';
 
 export interface PerformerDocument extends Performer, Document {
   _id: any;
-  live: boolean;
+  stream: {
+    title: string;
+    secretKey: string;
+    live: boolean;
+    settings: {
+      pricing: number;
+    };
+  };
 }
 
 function GenerateStreamKey(length: number) {
@@ -27,6 +34,14 @@ export const PerformerSchema = new Schema({
       default: GenerateStreamKey(48),
     },
     live: { type: Boolean, default: false },
+    settings: {
+      public: { type: Boolean, default: false },
+      pricing: { type: Number, default: 10 },
+      maxViewers: {
+        enabled: { type: Boolean, default: true },
+        amount: { type: Number, default: 8 },
+      },
+    },
   },
   performances: [
     {

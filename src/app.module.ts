@@ -17,6 +17,7 @@ import { PassportModule } from "@nestjs/passport";
 import { UserDeserializerMiddleware } from "middlewares/user-deserializer.middleware";
 import { ChatModule } from "./chat/chat.module";
 import { ChatGateway } from "./chat.gateway";
+import { PaymentModule } from "./payment/payment.module";
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ChatGateway } from "./chat.gateway";
     FileUploadModule,
     StrategiesModule,
     ChatModule,
+    PaymentModule,
   ],
   controllers: [AppController],
   providers: [AppService, ChatGateway],

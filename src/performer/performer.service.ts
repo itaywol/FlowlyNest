@@ -34,4 +34,11 @@ export class PerformerService {
 
     return performer;
   }
+
+  public async getPerformerEntryFee(performerID: string): Promise<number> {
+    const performer: PerformerDocument = await this.performerModel.findById(
+      performerID,
+    );
+    return performer.stream.settings.pricing;
+  }
 }
