@@ -1,20 +1,22 @@
-import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { AppService } from './app.service';
-import { UserModule } from './user/user.module';
-import { WinstonModule } from 'nest-winston';
-import { DatabaseModule } from './database/database.module';
-import { PerformerModule } from './performer/performer.module';
-import { PerformanceModule } from './performance/performance.module';
-import { TransactionsModule } from './transactions/transactions.module';
-import { winstonConfig } from './logger';
-import { StreamManagerModule } from './stream-manager/stream-manager.module';
-import { AuthModule } from './auth/auth.module';
-import { FileUploadModule } from './file-upload/file-upload.module';
-import { StrategiesModule } from 'passport-strategies/strategies.module';
-import { PassportModule } from '@nestjs/passport';
-import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middleware';
+import { MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { LoggerMiddleware } from "./middlewares/logger.middleware";
+import { AppService } from "./app.service";
+import { UserModule } from "./user/user.module";
+import { WinstonModule } from "nest-winston";
+import { DatabaseModule } from "./database/database.module";
+import { PerformerModule } from "./performer/performer.module";
+import { PerformanceModule } from "./performance/performance.module";
+import { TransactionsModule } from "./transactions/transactions.module";
+import { winstonConfig } from "./logger";
+import { StreamManagerModule } from "./stream-manager/stream-manager.module";
+import { AuthModule } from "./auth/auth.module";
+import { FileUploadModule } from "./file-upload/file-upload.module";
+import { StrategiesModule } from "passport-strategies/strategies.module";
+import { PassportModule } from "@nestjs/passport";
+import { UserDeserializerMiddleware } from "middlewares/user-deserializer.middleware";
+import { ChatModule } from "./chat/chat.module";
+import { ChatGateway } from "./chat.gateway";
 
 @Module({
   imports: [
@@ -29,21 +31,22 @@ import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middle
     AuthModule,
     FileUploadModule,
     StrategiesModule,
+    ChatModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, ChatGateway],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(UserDeserializerMiddleware)
       .forRoutes({
-        path: '*',
+        path: "*",
         method: RequestMethod.ALL,
       })
       .apply(LoggerMiddleware)
       .forRoutes({
-        path: '*',
+        path: "*",
         method: RequestMethod.ALL,
       });
   }
