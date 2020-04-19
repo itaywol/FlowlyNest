@@ -10,7 +10,9 @@
     "outDir": "./dist",
     "baseUrl": "./src",
     "esModuleInterop": false,
-    "incremental": true
+    "incremental": true, 
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "exclude": ["node_modules", "dist"]
 }

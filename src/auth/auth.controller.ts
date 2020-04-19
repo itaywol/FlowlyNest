@@ -7,30 +7,32 @@ import {
   Session,
   Get,
   Req,
-  Next,
-  Res,
   UseGuards,
+  Delete,
 } from '@nestjs/common';
 import {
   CreateUserDTO,
   User,
-  LoginUserDTO,
+  UserDto,
+  RequestWithAuth,
 } from 'user/interfaces/user.interface';
 import { UserService } from 'user/user.service';
 import { Logger } from 'winston';
-import { Request, Response } from 'express';
-import { AuthGuard } from 'middlewares/auth.guard';
+import { NativeError, Model, Document } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { LocalAuthGuard } from './local.strategy';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private userService: UserService,
+    @InjectModel('Session') private readonly sessionModel: Model<Document>,
     @Inject('winston') private logger: Logger,
   ) {}
 
   @Post('register')
   async registerUser(
-    @Session() session: any,
+    @Session() session: Express.Session,
     @Body() data: CreateUserDTO,
   ): Promise<string> {
     const createdUser: User = await this.userService.registerUser(data);
@@ -43,34 +45,42 @@ export class AuthController {
     return createdUser._id;
   }
 
-  @Post('login')
-  async loginUser(
-    @Session() session: any,
-    @Body() data: LoginUserDTO,
-  ): Promise<string> {
-    const loginUser = await this.userService.validateUser(data);
+  @Post()
+  @UseGuards(new LocalAuthGuard())
+  async loginUser(@Req() req: RequestWithAuth, @Session() session: Express.Session): Promise<UserDto> {
+      session.passport = {
+        userId: req.user.id,
+    };
 
-    if (!loginUser)
-      throw new HttpException('Email or Password not Correct', 404);
+      // Delete other sessions
+      await this.sessionModel.updateMany({
+                                          '_id': { $ne: req.session.id},
+                                          'session.passport.userId': req.user.id,
+                                      }, { $unset: { 'session.passport': '' }}).exec((err: NativeError, result) => {
+          if ( result.n > 0) {
+              this.logger.debug(`signed out other sessions for user: "${req.user.email}"`);
+          }
 
-    session.user = loginUser;
-    delete session.user.password;
-    return loginUser._id;
+          if (err !== null) {
+              throw err;
+          }
+      });
+
+      return (req.user);
   }
 
-  @Post('validate')
-  @UseGuards(AuthGuard)
-  async validate(): Promise<boolean> {
-    return true;
+
+  @Get()
+  async getUser(@Req() req: RequestWithAuth): Promise<UserDto> {
+    return (req.user as UserDto);
   }
 
-  @Get('logout')
-  async logoutUser(@Session() session: any, @Res() res: Response) {
-    session.destroy();
-    res.cookie(process.env.SESSION_COOKIE_NAME || 'performa_auth', '', {
-      maxAge: 0,
-      httpOnly: true,
+  @Delete()
+  async logoutUser(@Session() session: Express.Session) {
+    session.destroy((err) => {
+      if (err !== undefined) {
+        throw err;
+      }
     });
-    return res.redirect('/');
   }
 }

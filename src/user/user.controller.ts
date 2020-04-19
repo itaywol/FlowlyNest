@@ -11,17 +11,16 @@ import {
 } from '@nestjs/common';
 import { User, UpdateUserDTO } from './interfaces/user.interface';
 import { UserService } from './user.service';
-import { AuthGuard } from 'middlewares/auth.guard';
 import { Personalized } from 'personalized.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
   constructor(private userSerivce: UserService) {}
 
   @Get()
-  @UseGuards(AuthGuard)
-  public async myUser(@Session() session: any): Promise<User> {
-    delete session.user.password;
+  @UseGuards(AuthGuard())
+  public async myUser(@Session() session: Express.Session): Promise<User> {
     return await session.user;
   }
 
@@ -36,9 +35,9 @@ export class UserController {
   }
 
   @Put()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   public async updateMyProfile(
-    @Session() session: any,
+    @Session() session: Express.Session,
     @Body() updateUserData: UpdateUserDTO,
   ): Promise<User> {
     if (!session.user) throw new HttpException('Not loggedin user', 401);
@@ -47,7 +46,7 @@ export class UserController {
 
   @Put(':id')
   @Personalized(true)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   public async updateProfile(
     @Param('id') id: string,
     @Body() updateUserData: UpdateUserDTO,

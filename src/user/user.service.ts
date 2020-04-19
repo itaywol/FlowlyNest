@@ -8,8 +8,8 @@ import {
   UpdateUserDTO,
   LoginUserDTO,
 } from 'user/interfaces/user.interface';
-import { PerformerService } from 'performer/performer.service';
 import { PerformerDocument } from 'schemas/performer.schema';
+import { PerformerService } from 'performer/performer.service';
 
 @Injectable()
 export class UserService {

@@ -4,12 +4,11 @@ import {
   Get,
   Body,
   Res,
-  Req,
   Session,
   HttpException,
   Inject,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PerformerService } from 'performer/performer.service';
 import { PerformerDocument } from 'schemas/performer.schema';
 import { Logger } from 'winston';

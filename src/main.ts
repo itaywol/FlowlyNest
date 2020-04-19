@@ -1,7 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import * as cors from 'cors';
 import * as bodyParser from 'body-parser';
 import * as expressSession from 'express-session';
 import * as passport from 'passport';
@@ -26,7 +25,7 @@ function initMiddlewares(app: INestApplication) {
       store: new MongoStore({
         stringify: false,
         url: process.env.MONGO_URI,
-        collection: process.env.SESSION_MONGO_COLLECTION_NAME || 'authSessions',
+        collection: 'sessions',
       }),
       resave: false,
       saveUninitialized: false,

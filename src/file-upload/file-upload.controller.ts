@@ -5,7 +5,6 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { File } from '@google-cloud/storage';
 
 //TODO: finish interfaces
 //TODO: find solution for multer-google-storage import
