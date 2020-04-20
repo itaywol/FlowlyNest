@@ -10,19 +10,15 @@ export class AuthGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request: Request = context.switchToHttp().getRequest();
-    const id: string =
-      request?.params?.id ||
-      request?.body?.id ||
-      request?.query?.id ||
-      undefined;
     const personalized = this.reflector.get<boolean>(
       'personalized',
       context.getHandler(),
     );
 
-    const authenticatedFlag = request?.session?.user !== undefined;
+    const id: string = request.params.id || request.body.id || request.query.id;
+
+    const authenticatedFlag = request.session.user !== undefined;
     if (!authenticatedFlag) return false;
-    if (!id) return true;
     // If resource requires personalization then compare possible ids with req session id , if not then its ok continue
     const personalizedFlag =
       personalized && personalized === true
