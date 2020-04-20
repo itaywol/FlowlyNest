@@ -46,21 +46,20 @@ export class ChatGateway
     );
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('onMessageFromClient')
   onMessageFromClient(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { room: string; message: string },
   ): void {
-    this.server.to(payload.room).emit(
-      JSON.stringify({
-        sender: client.handshake.session.user.nickName,
-        message: payload.message,
-      }),
+    this.logger.info(
+      `${client.handshake.session.user.nickName} has sent a message to room: ${payload.room}`,
     );
+    this.server.to(payload.room).emit('onMessageFromServer', {
+      sender: client.handshake.session.user.nickName,
+      message: payload.message,
+    });
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('joinRoom')
   handleJoinRoomRequest(
     @ConnectedSocket() client: Socket,
@@ -71,7 +70,6 @@ export class ChatGateway
     client.emit('joinedRoom', room);
   }
 
-  @UseGuards(AuthGuard)
   @SubscribeMessage('leaveRoom')
   handleLeaveRoomRequest(
     @ConnectedSocket() client: Socket,
