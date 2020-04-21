@@ -68,7 +68,7 @@ export class StreamManagerController {
   // Get route to check if user is authenticated
   // For nginx auth_request purposes
   @Get('auth')
-  public async auth(@Session() session: any) {
+  public async auth(@Session() session: Express.Session) {
     if (process.env.WATCHING_STREAM_REQUIRES_AUTH === 'false') return 'ok';
     if (session.user) return 'ok';
     throw new HttpException('Unauthorized', 401);
