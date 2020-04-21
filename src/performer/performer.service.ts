@@ -25,6 +25,13 @@ export class PerformerService {
     return createdPerformer;
   }
 
+  public async getPerformerById(id: string): Promise<PerformerDocument> {
+    const performer: PerformerDocument = await this.performerModel
+      .findById(id)
+      .populate('user');
+    return performer;
+  }
+
   public async getPerformerBySecret(
     secret: string,
   ): Promise<PerformerDocument> {

@@ -11,6 +11,9 @@ export interface User {
   enabled: boolean;
   performer: Performer;
   lastSeenAt: number;
+  balance: {
+    currentBalance: number;
+  };
 }
 export interface LoginUserDTO {
   email: string;

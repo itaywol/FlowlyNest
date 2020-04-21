@@ -4,6 +4,10 @@ import { uidSync } from 'uid-ts';
 
 export interface PerformerDocument extends Performer, Document {
   _id: any;
+  paypal: {
+    email: string;
+    phoneNumber: string;
+  };
   stream: {
     title: string;
     secretKey: string;
@@ -25,6 +29,10 @@ export const PerformerSchema = new Schema({
     ref: 'User',
     required: true,
     unique: true,
+  },
+  paypal: {
+    email: { type: String },
+    phoneNumber: { type: String },
   },
   stream: {
     title: { type: String, required: true, default: 'my stream' },

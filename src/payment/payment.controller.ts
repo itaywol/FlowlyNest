@@ -62,4 +62,13 @@ export class PaymentController {
   async checkout(@Session() session: any, @Body() data: ICreatePaymentDTO) {
     return await this.paymentService.checkout(session?.user?._id, data);
   }
+
+  @Post('payout')
+  @UseGuards(AuthGuard)
+  async withdraw(@Session() session: any, @Body() body: { amount: number }) {
+    return await this.paymentService.withdraw(
+      session?.user?.performer,
+      body.amount,
+    );
+  }
 }

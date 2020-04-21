@@ -1,4 +1,6 @@
 import { Injectable, HttpService, HttpException } from '@nestjs/common';
+// TODO: generate types or switch to fully axios implementation
+const paypal = require('@paypal/payouts-sdk');
 import {
   ICreatePaymentDTO,
   IPaymentResponse,
@@ -19,13 +21,17 @@ import {
   ValidatedResponse,
   Transaction,
 } from 'braintree';
+import { PerformerDocument } from 'schemas/performer.schema';
+import { UserService } from 'user/user.service';
 
 @Injectable()
 export class PaymentService {
   private braintreeGateway: BraintreeGateway;
+  private paypalClient: any;
   constructor(
     private httpService: HttpService,
     private performerService: PerformerService,
+    private userService: UserService,
     @InjectModel('PaymentPlan')
     private paymentPlanModel: Model<PaymentPlanDocument>,
   ) {
@@ -35,6 +41,14 @@ export class PaymentService {
       publicKey: process.env.BRAINTREE_PUBLIC_KEY,
       privateKey: process.env.BRAINTREE_PRIVATE_KEY,
     });
+    const clientId = process.env.PAYPAL_CLIENT_ID;
+    const clientSecret = process.env.PAYPAL_CLIENT_SECRET;
+    const paypalEnvironment = new paypal.core.SandboxEnvironment(
+      clientId,
+      clientSecret,
+    );
+
+    this.paypalClient = new paypal.core.PayPalHttpClient(paypalEnvironment);
   }
 
   async getPaymentPlanById(planId: string): Promise<PaymentPlan | undefined> {
@@ -140,5 +154,57 @@ export class PaymentService {
     if (transaction.errors) {
       console.log('error');
     }
+  }
+
+  //TODO: currency selection and conversion
+  async withdraw(_id: string, amount: number) {
+    const performer: PerformerDocument = await this.performerService.getPerformerById(
+      _id,
+    );
+
+    if (amount > performer.user.balance.currentBalance)
+      throw new HttpException('Payout amount higher then holdings', 401);
+
+    const dedactBalace = await this.userService.takeBalanceFromUser(
+      performer.user._id,
+      amount,
+    );
+    if (!dedactBalace)
+      throw new HttpException("Couldn't decrement balance", 500);
+
+    const request = new paypal.payouts.PayoutsPostRequest();
+
+    const payout = {
+      // eslint-disable-next-line @typescript-eslint/camelcase
+      sender_batch_header: {
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        recipient_type: 'EMAIL',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        email_message: "Here is you'r Payout",
+        note: 'Enjoy',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        sender_batch_id: 'Performa',
+        // eslint-disable-next-line @typescript-eslint/camelcase
+        email_subject: "You'r Performa Payout",
+      },
+      items: [
+        {
+          note: `You'r ${amount} payout`,
+          amount: {
+            currency: 'USD',
+            value: amount,
+          },
+          receiver: performer.paypal.email || performer.user.email,
+          // eslint-disable-next-line @typescript-eslint/camelcase
+          sender_item_id: `${amount} eBalance withdrawl`,
+        },
+      ],
+    };
+    request.requestBody(payout);
+
+    const createPayout = await this.paypalClient.execute(request);
+    if (!createPayout) throw new HttpException('Payout failed', 500);
+
+    console.log('Success');
   }
 }

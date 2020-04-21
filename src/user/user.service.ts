@@ -116,4 +116,14 @@ export class UserService {
 
     return updateUser;
   }
+
+  async takeBalanceFromUser(_id: string, amount: number): Promise<User> {
+    const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
+      _id,
+      { $inc: { 'balance.currentBalance': -amount } },
+      { new: true },
+    );
+
+    return updateUser;
+  }
 }
