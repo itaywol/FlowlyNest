@@ -36,6 +36,7 @@
     "@nestjs/platform-socket.io": "^7.0.8",
     "@nestjs/websockets": "^7.0.8",
     "express-socket.io-session": "^1.3.5",
+    "@paypal/payouts-sdk": "^1.0.0",
     "braintree": "^2.22.0",
     "graphql": "14.6.0",
     "graphql-tools": "4.0.7",
