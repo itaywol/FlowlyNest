@@ -21,9 +21,9 @@ export class UserController {
   @Post()
   async registerUser(
     @Session() session: Express.Session,
-    @Body() data: CreateUserDTO,
+    @Body() body: CreateUserDTO,
   ): Promise<string> {
-    const createdUser: User = await this.userService.registerUser(data);
+    const createdUser: User = await this.userService.registerUser(body);
 
     if (!createdUser) throw new HttpException('User Already Exists', 401);
 

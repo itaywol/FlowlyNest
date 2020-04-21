@@ -48,7 +48,6 @@ export class AuthController {
       return (req.user);
   }
 
-
   @Get()
   async getUser(@Req() req: RequestWithAuth): Promise<UserDto> {
     return (req.user as UserDto);
@@ -57,7 +56,7 @@ export class AuthController {
   @Delete()
   async logoutUser(@Session() session: Express.Session) {
     session.destroy((err) => {
-      if (err !== undefined) {
+      if (err) {
         throw err;
       }
     });
