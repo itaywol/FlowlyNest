@@ -9,7 +9,11 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
-import { User, UpdateUserDTO, CreateUserDTO } from './interfaces/user.interface';
+import {
+  User,
+  UpdateUserDTO,
+  CreateUserDTO,
+} from './interfaces/user.interface';
 import { UserService } from './user.service';
 import { Personalized } from 'personalized.decorator';
 import { AuthGuard } from '@nestjs/passport';
@@ -30,10 +34,10 @@ export class UserController {
     session.passport = {
       userId: createdUser._id,
     };
-    
+
     return createdUser._id;
   }
-  
+
   @Get()
   @UseGuards(AuthGuard())
   public async myUser(@Session() session: Express.Session): Promise<User> {

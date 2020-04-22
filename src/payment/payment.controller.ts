@@ -12,12 +12,11 @@ import {
 import { PaymentService } from './payment.service';
 import {
   ICreatePaymentDTO,
-  IPaymentResponse,
   ICreatePaymentPlanDTO,
   IUpdatePaymentPlanDTO,
   PaymentPlan,
 } from './interfaces/payment.interfaces';
-import { AuthGuard } from 'middlewares/auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('payment')
 export class PaymentController {
@@ -53,18 +52,18 @@ export class PaymentController {
   //PAYMENTS
   ///
   @Post('token')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   async getToken() {
     return await this.paymentService.getToken();
   }
   @Post('checkout')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   async checkout(@Session() session: any, @Body() data: ICreatePaymentDTO) {
     return await this.paymentService.checkout(session?.user?._id, data);
   }
 
   @Post('payout')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   async withdraw(@Session() session: any, @Body() body: { amount: number }) {
     return await this.paymentService.withdraw(
       session?.user?.performer,

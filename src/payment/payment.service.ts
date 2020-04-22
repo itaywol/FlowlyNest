@@ -1,17 +1,15 @@
-import { Injectable, HttpService, HttpException } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 // TODO: generate types or switch to fully axios implementation
 const paypal = require('@paypal/payouts-sdk');
 import {
   ICreatePaymentDTO,
-  IPaymentResponse,
-  IPaymentCreation,
   PaymentPlan,
   ICreatePaymentPlanDTO,
   IUpdatePaymentPlanDTO,
 } from './interfaces/payment.interfaces';
 import { PerformerService } from 'performer/performer.service';
 import { PaymentPlanDocument } from 'schemas/payment.schema';
-import { Model, Query } from 'mongoose';
+import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   connect,
@@ -29,7 +27,6 @@ export class PaymentService {
   private braintreeGateway: BraintreeGateway;
   private paypalClient: any;
   constructor(
-    private httpService: HttpService,
     private performerService: PerformerService,
     private userService: UserService,
     @InjectModel('PaymentPlan')
