@@ -27,9 +27,10 @@ export class UserController {
 
     if (!createdUser) throw new HttpException('User Already Exists', 401);
 
-    session.user = createdUser;
-    delete session.user.password;
-
+    session.passport = {
+      userId: createdUser._id,
+    };
+    
     return createdUser._id;
   }
   

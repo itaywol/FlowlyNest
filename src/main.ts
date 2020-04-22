@@ -12,10 +12,6 @@ export function isProduction(): boolean {
 }
 
 function initMiddlewares(app: INestApplication) {
-  app.enableCors({
-    origin: process.env.EXPRESS_CORS || '*',
-    credentials: true,
-  });
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
   app.use(
@@ -24,8 +20,7 @@ function initMiddlewares(app: INestApplication) {
       name: process.env.SESSION_COOKIE_NAME || 'performa_auth',
       store: new MongoStore({
         stringify: false,
-        url: process.env.MONGO_URI,
-        collection: 'sessions',
+        url: process.env.MONGO_URI
       }),
       resave: false,
       saveUninitialized: false,
@@ -33,10 +28,7 @@ function initMiddlewares(app: INestApplication) {
         maxAge: parseInt(
           process.env.SESSION_COOKIE_MAX_AGE || '30*24*24*60*60*1000',
         ),
-        httpOnly: true,
         secure: isProduction(),
-        sameSite: true,
-        domain: process.env.PUBLIC_DOMAIN || 'localhost',
       },
     }),
   );

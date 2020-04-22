@@ -4,21 +4,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserSchema } from 'schemas/user.schema';
 import { UserController } from './user.controller';
 import { PerformerModule } from 'performer/performer.module';
-import { PassportModule } from '@nestjs/passport';
-
-const passportModule = PassportModule.register({ defaultStrategy: 'local' });
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-    PerformerModule,
-    passportModule
+    PerformerModule
   ],
   providers: [UserService],
   controllers: [UserController],
   exports: [
-    UserService,
-    passportModule
+    UserService
   ],
 })
 export class UserModule {}

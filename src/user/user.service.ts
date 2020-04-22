@@ -15,7 +15,7 @@ import { PerformerService } from 'performer/performer.service';
 export class UserService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
-    private performerService: PerformerService,
+    private performerService: PerformerService
   ) {}
 
   public async registerUser(createUser: CreateUserDTO): Promise<User> {
