@@ -1,4 +1,5 @@
 import { Performer } from 'performer/interfaces/performer.interface';
+import { Request } from "express"
 
 export interface User {
   _id: any;
@@ -16,6 +17,12 @@ export interface LoginUserDTO {
   password: string;
 }
 
+export interface UserDto {
+  id: string;
+  email: string;
+  nickName: string;
+}
+
 export interface CreateUserDTO {
   email: string;
   password: string;
@@ -27,4 +34,8 @@ export interface UpdateUserDTO {
   firstName: string;
   lastName: string;
   phoneNumber: string;
+}
+
+export interface RequestWithAuth extends Request {
+  user: UserDto;
 }

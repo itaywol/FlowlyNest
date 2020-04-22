@@ -4,12 +4,11 @@ import {
   Get,
   Body,
   Res,
-  Req,
   Session,
   HttpException,
   Inject,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { PerformerService } from 'performer/performer.service';
 import { PerformerDocument } from 'schemas/performer.schema';
 import { Logger } from 'winston';
@@ -69,7 +68,7 @@ export class StreamManagerController {
   // Get route to check if user is authenticated
   // For nginx auth_request purposes
   @Get('auth')
-  public async auth(@Session() session: any) {
+  public async auth(@Session() session: Express.Session) {
     if (process.env.WATCHING_STREAM_REQUIRES_AUTH === 'false') return 'ok';
     if (session.user) return 'ok';
     throw new HttpException('Unauthorized', 401);

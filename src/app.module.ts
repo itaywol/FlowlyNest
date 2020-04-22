@@ -12,10 +12,14 @@ import { winstonConfig } from './logger';
 import { StreamManagerModule } from './stream-manager/stream-manager.module';
 import { AuthModule } from './auth/auth.module';
 import { FileUploadModule } from './file-upload/file-upload.module';
+import { StrategiesModule } from 'passport-strategies/strategies.module';
+import { PassportModule } from '@nestjs/passport';
+import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middleware';
 
 @Module({
   imports: [
     WinstonModule.forRoot(winstonConfig),
+    PassportModule.register({ session: false }),
     DatabaseModule,
     UserModule,
     PerformerModule,
@@ -24,15 +28,23 @@ import { FileUploadModule } from './file-upload/file-upload.module';
     StreamManagerModule,
     AuthModule,
     FileUploadModule,
+    StrategiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes({
-      path: '*',
-      method: RequestMethod.ALL,
-    });
+    consumer
+      .apply(UserDeserializerMiddleware)
+      .forRoutes({
+        path: '*',
+        method: RequestMethod.ALL,
+      })
+      .apply(LoggerMiddleware)
+      .forRoutes({
+        path: '*',
+        method: RequestMethod.ALL,
+      });
   }
 }

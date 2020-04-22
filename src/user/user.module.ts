@@ -8,13 +8,12 @@ import { PerformerModule } from 'performer/performer.module';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
-    PerformerModule,
+    PerformerModule
   ],
   providers: [UserService],
   controllers: [UserController],
   exports: [
-    UserService,
-    MongooseModule.forFeature([{ name: 'User', schema: UserSchema }]),
+    UserService
   ],
 })
 export class UserModule {}

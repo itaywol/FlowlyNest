@@ -1,4 +1,4 @@
-import { Document, Schema, Types } from 'mongoose';
+import { Document, Schema } from 'mongoose';
 import { Performer } from 'performer/interfaces/performer.interface';
 import { uidSync } from 'uid-ts';
 

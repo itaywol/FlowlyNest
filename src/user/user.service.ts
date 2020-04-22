@@ -8,14 +8,14 @@ import {
   UpdateUserDTO,
   LoginUserDTO,
 } from 'user/interfaces/user.interface';
-import { PerformerService } from 'performer/performer.service';
 import { PerformerDocument } from 'schemas/performer.schema';
+import { PerformerService } from 'performer/performer.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
-    private performerService: PerformerService,
+    private performerService: PerformerService
   ) {}
 
   public async registerUser(createUser: CreateUserDTO): Promise<User> {

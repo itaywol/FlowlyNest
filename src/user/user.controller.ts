@@ -9,49 +9,64 @@ import {
   HttpException,
   UseGuards,
 } from '@nestjs/common';
-import { User, UpdateUserDTO } from './interfaces/user.interface';
+import { User, UpdateUserDTO, CreateUserDTO } from './interfaces/user.interface';
 import { UserService } from './user.service';
-import { AuthGuard } from 'middlewares/auth.guard';
 import { Personalized } from 'personalized.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
 export class UserController {
-  constructor(private userSerivce: UserService) {}
+  constructor(private userService: UserService) {}
 
+  @Post()
+  async registerUser(
+    @Session() session: Express.Session,
+    @Body() body: CreateUserDTO,
+  ): Promise<string> {
+    const createdUser: User = await this.userService.registerUser(body);
+
+    if (!createdUser) throw new HttpException('User Already Exists', 401);
+
+    session.passport = {
+      userId: createdUser._id,
+    };
+    
+    return createdUser._id;
+  }
+  
   @Get()
-  @UseGuards(AuthGuard)
-  public async myUser(@Session() session: any): Promise<User> {
-    delete session.user.password;
+  @UseGuards(AuthGuard())
+  public async myUser(@Session() session: Express.Session): Promise<User> {
     return await session.user;
   }
 
   @Get(':id')
   public async getUserByID(@Param('id') id: string): Promise<User> {
-    return (await this.userSerivce.getUserByID(id)) as User;
+    return (await this.userService.getUserByID(id)) as User;
   }
 
   @Post(':id/performer')
   public async makePerformerAccount(@Param('id') id: string): Promise<User> {
-    return (await this.userSerivce.makeUserPerformer(id)) as User;
+    return (await this.userService.makeUserPerformer(id)) as User;
   }
 
   @Put()
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   public async updateMyProfile(
-    @Session() session: any,
+    @Session() session: Express.Session,
     @Body() updateUserData: UpdateUserDTO,
   ): Promise<User> {
     if (!session.user) throw new HttpException('Not loggedin user', 401);
-    return await this.userSerivce.updateUser(session.user._id, updateUserData);
+    return await this.userService.updateUser(session.user._id, updateUserData);
   }
 
   @Put(':id')
   @Personalized(true)
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard())
   public async updateProfile(
     @Param('id') id: string,
     @Body() updateUserData: UpdateUserDTO,
   ): Promise<User> {
-    return await this.userSerivce.updateUser(id, updateUserData);
+    return await this.userService.updateUser(id, updateUserData);
   }
 }
