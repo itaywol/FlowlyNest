@@ -6,7 +6,6 @@ import {
   Put,
   Get,
   Query,
-  UseGuards,
   Session,
   Req,
   HttpException,
@@ -18,7 +17,6 @@ import {
   IUpdatePaymentPlanDTO,
   PaymentPlan,
 } from './interfaces/payment.interfaces';
-import { LocalAuthGuard } from '../passport-strategies/local.strategy';
 import { RequestWithAuth } from 'user/interfaces/user.interface';
 
 @Controller('payment')
@@ -60,13 +58,11 @@ export class PaymentController {
     return await this.paymentService.getToken();
   }
   @Post('checkout')
-  @UseGuards(new LocalAuthGuard())
   async checkout(@Req() req: RequestWithAuth, @Body() data: ICreatePaymentDTO) {
     return await this.paymentService.checkout(req.user.id, data);
   }
 
   @Post('payout')
-  @UseGuards(new LocalAuthGuard())
   async withdraw(@Session() session: any, @Body() body: { amount: number }) {
     return await this.paymentService.withdraw(
       session?.user?.performer,

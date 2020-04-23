@@ -15,7 +15,7 @@ import { PerformerService } from 'performer/performer.service';
 export class UserService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
-    private performerService: PerformerService
+    private performerService: PerformerService,
   ) {}
 
   public async registerUser(createUser: CreateUserDTO): Promise<User> {
@@ -121,6 +121,15 @@ export class UserService {
     const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
       _id,
       { $inc: { 'balance.currentBalance': -amount } },
+      { new: true },
+    );
+
+    return updateUser;
+  }
+  async addBalanceToUser(_id: string, amount: number): Promise<User> {
+    const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
+      _id,
+      { $inc: { 'balance.currentBalance': amount } },
       { new: true },
     );
 

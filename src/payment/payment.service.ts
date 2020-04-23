@@ -145,11 +145,11 @@ export class PaymentService {
      * TODO: return restful response
      */
     if (transaction.success) {
-      console.log('success');
+      this.userService.addBalanceToUser(purchaserId, amount);
     }
 
     if (transaction.errors) {
-      console.log('error');
+      console.error(transaction);
     }
   }
 
