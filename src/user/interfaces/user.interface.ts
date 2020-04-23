@@ -1,5 +1,5 @@
 import { Performer } from 'performer/interfaces/performer.interface';
-import { Request } from "express"
+import { Request } from 'express';
 
 export interface User {
   _id: any;
@@ -24,6 +24,12 @@ export interface UserDto {
   id: string;
   email: string;
   nickName: string;
+  phoneNumber: string;
+  firstName: string;
+  lastName: string;
+  balance: {
+    currentBalance: number;
+  };
 }
 
 export interface CreateUserDTO {
@@ -42,3 +48,4 @@ export interface UpdateUserDTO {
 export interface RequestWithAuth extends Request {
   user: UserDto;
 }
+

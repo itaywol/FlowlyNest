@@ -8,11 +8,14 @@ import {
   Body,
   HttpException,
   UseGuards,
+  Req,
 } from '@nestjs/common';
 import {
   User,
   UpdateUserDTO,
   CreateUserDTO,
+  RequestWithAuth,
+  UserDto,
 } from './interfaces/user.interface';
 import { UserService } from './user.service';
 import { Personalized } from 'personalized.decorator';
@@ -39,9 +42,8 @@ export class UserController {
   }
 
   @Get()
-  @UseGuards(AuthGuard())
-  public async myUser(@Session() session: Express.Session): Promise<User> {
-    return await session.user;
+  public async myUser(@Req() req: RequestWithAuth): Promise<UserDto> {
+    return req.user;
   }
 
   @Get(':id')

@@ -8,6 +8,8 @@ import {
   Query,
   UseGuards,
   Session,
+  Req,
+  HttpException,
 } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import {
@@ -16,7 +18,8 @@ import {
   IUpdatePaymentPlanDTO,
   PaymentPlan,
 } from './interfaces/payment.interfaces';
-import { AuthGuard } from '@nestjs/passport';
+import { LocalAuthGuard } from '../passport-strategies/local.strategy';
+import { RequestWithAuth } from 'user/interfaces/user.interface';
 
 @Controller('payment')
 export class PaymentController {
@@ -52,18 +55,18 @@ export class PaymentController {
   //PAYMENTS
   ///
   @Post('token')
-  @UseGuards(AuthGuard())
-  async getToken() {
+  async getToken(@Req() req: RequestWithAuth) {
+    if (!req.session.passport) throw new HttpException('Unauthorized', 401);
     return await this.paymentService.getToken();
   }
   @Post('checkout')
-  @UseGuards(AuthGuard())
-  async checkout(@Session() session: any, @Body() data: ICreatePaymentDTO) {
-    return await this.paymentService.checkout(session?.user?._id, data);
+  @UseGuards(new LocalAuthGuard())
+  async checkout(@Req() req: RequestWithAuth, @Body() data: ICreatePaymentDTO) {
+    return await this.paymentService.checkout(req.user.id, data);
   }
 
   @Post('payout')
-  @UseGuards(AuthGuard())
+  @UseGuards(new LocalAuthGuard())
   async withdraw(@Session() session: any, @Body() body: { amount: number }) {
     return await this.paymentService.withdraw(
       session?.user?.performer,
