@@ -57,7 +57,7 @@ export class PaymentService {
   }
 
   async getPaymentPlans(): Promise<PaymentPlan[] | undefined> {
-    return this.paymentPlanModel.find({});
+    return (await this.paymentPlanModel.find({})) as PaymentPlan[];
   }
 
   async createPaymentPlan(

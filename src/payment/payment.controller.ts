@@ -28,7 +28,7 @@ export class PaymentController {
   ///
   @Get('plan')
   async getPaymentPlans(): Promise<PaymentPlan[] | undefined> {
-    return await this.paymentService.getPaymentPlans();
+    return (await this.paymentService.getPaymentPlans()) as PaymentPlan[];
   }
   @Post('plan')
   async createPaymentPlan(
