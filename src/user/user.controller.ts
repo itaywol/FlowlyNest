@@ -23,7 +23,7 @@ export class UserController {
     @Session() session: Express.Session,
     @Body() body: CreateUserDTO,
   ): Promise<string> {
-    const createdUser: User = await this.userService.registerUser(body);
+    const createdUser: User = await this.userService.registerLocal(body);
 
     if (!createdUser) throw new HttpException('User Already Exists', 401);
 

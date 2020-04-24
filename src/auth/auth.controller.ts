@@ -21,7 +21,7 @@ export class AuthController {
     @Req() req: RequestWithAuth
   ): Promise<UserDto> {
     req.session.passport = {
-      userId: req.user.id,
+      userId: req.user._id,
     };
 
     // TODO: DELETE OTHER SESSIONS

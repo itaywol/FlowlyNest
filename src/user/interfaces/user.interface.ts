@@ -1,26 +1,40 @@
 import { Performer } from 'performer/interfaces/performer.interface';
 import { Request } from "express"
 
-export interface User {
-  _id: any;
+export type AuthType = AuthTypes.Local | AuthTypes.Local;
+
+declare namespace AuthTypes {
+  interface Local {
+    authType: "local";
+    password?: string;
+  }
+
+  interface Facebook {
+    authType: "facebook";
+    facebook: string;
+  }
+}
+
+export interface UserDto {
+  _id: string;
   email: string;
+  nickName: string;
   firstName: string;
   lastName: string;
-  nickName: string;
   phoneNumber: string;
   enabled: boolean;
   performer: Performer;
   lastSeenAt: number;
 }
+
+export interface User extends UserDto {
+  _id: any;
+  auth: AuthType;
+}
+
 export interface LoginUserDTO {
   email: string;
   password: string;
-}
-
-export interface UserDto {
-  id: string;
-  email: string;
-  nickName: string;
 }
 
 export interface CreateUserDTO {

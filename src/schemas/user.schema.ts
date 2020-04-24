@@ -5,13 +5,6 @@ import { Performer } from 'performer/interfaces/performer.interface';
 
 export interface UserDocument extends User, Document {
   performer: Performer;
-  password: string;
-  lowercaseEmail: string;
-  lowercaseNickName: string;
-  passwordReset?: {
-    token: string;
-    expiration: Date;
-  };
 
   checkPassword(password: string): Promise<boolean>;
 }
@@ -27,22 +20,18 @@ function validateEmail(email: string) {
 
 export const UserSchema = new Schema(
   {
-    email: {
-      type: String,
+    auth: {
+      type: {
+        authType: { type: String, required: true },
+        facebook: { type: String, required: false, unique: true },
+        password: { type: String, required: false },
+      },
       required: true,
-      unqiue: true,
-      validate: validateEmail,
     },
-    lowercaseEmail: {
-      type: String,
-      unique: true,
-      select: false,
-    },
-    password: { type: String, required: true, select: false },
+    email: { type: String, required: true, unique: true },
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
     nickName: { type: String, required: true, unique: true },
-    lowercaseNickName: { type: String, unique: true, select: false },
     phoneNumber: { type: String, required: false },
     performer: {
       type: Schema.Types.ObjectId,
@@ -63,58 +52,40 @@ export const UserSchema = new Schema(
 UserSchema.pre<UserDocument>('save', function(next) {
   const user = this;
 
-  user.lowercaseEmail = user.email.toLowerCase();
-  user.lowercaseNickName = user.nickName.toLowerCase();
-
-  // Make sure not to rehash the password if it is already hashed
-  if (!user.isModified('password')) {
-    return next();
-  }
-
-  // Generate a salt and use it to hash the user's password
-  bcrypt.genSalt(10, (genSaltError, salt) => {
-    if (genSaltError) {
-      return next(genSaltError);
-    }
-
-    bcrypt.hash(user.password, salt, (err, hash) => {
-      if (err) {
-        return next(err);
-      }
-      user.password = hash;
-      next();
-    });
-  });
-});
-
-UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function(next) {
-  const updateFields = this.getUpdate();
-
-  if (updateFields.email) {
-    this.update(
-      {},
-      { $set: { lowercaseEmail: updateFields.email.toLowerCase() } },
-    );
-  }
-  if (updateFields.nickName) {
-    this.update(
-      {},
-      { $set: { lowercaseNickName: updateFields.nickName.toLowerCase() } },
-    );
-  }
-
-  // Generate a salt and use it to hash the user's password
-  if (updateFields.password) {
+  if (user.auth.authType === 'local' && user.isModified('auth.password')) {
     bcrypt.genSalt(10, (genSaltError, salt) => {
       if (genSaltError) {
         return next(genSaltError);
       }
 
-      bcrypt.hash(updateFields.password, salt, (err, hash) => {
+      bcrypt.hash(user.auth.password, salt, (err, hash) => {
         if (err) {
           return next(err);
         }
-        updateFields.password = hash;
+        user.auth.password = hash;
+        next();
+      });
+    });
+  } else {
+    return next();
+  }
+});
+
+UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function(next) {
+  const updateFields = this.getUpdate();
+
+  // Generate a salt and use it to hash the user's password
+  if (updateFields.auth.password) {
+    bcrypt.genSalt(10, (genSaltError, salt) => {
+      if (genSaltError) {
+        return next(genSaltError);
+      }
+
+      bcrypt.hash(updateFields.auth.password, salt, (err, hash) => {
+        if (err) {
+          return next(err);
+        }
+        updateFields.auth.password = hash;
         next();
       });
     });
@@ -129,7 +100,7 @@ UserSchema.methods.checkPassword = function(
   const user = this;
 
   return new Promise((resolve, reject) => {
-    bcrypt.compare(password, user.password, (error, isMatch) => {
+    bcrypt.compare(password, user.auth.password, (error, isMatch) => {
       if (error) {
         reject(error);
       }

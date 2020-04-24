@@ -23,7 +23,7 @@ export class LocalStrategy {
           done: (error: any, user?: any, options?: IVerifyOptions) => void,
         ) => {
           try {
-            const user = await userService.validateUser({ email, password });
+            const user = await userService.validateLocalUser({ email, password });
 
             if (!user) {
               return done(new UnauthorizedException(), false);

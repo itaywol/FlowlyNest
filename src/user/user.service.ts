@@ -1,28 +1,38 @@
-import { Injectable, HttpException } from '@nestjs/common';
+import { Injectable, HttpException, Inject } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from 'schemas/user.schema';
 import {
-  CreateUserDTO,
+  CreateUserDTO as CreateLocalUserDTO,
   User,
   UpdateUserDTO,
-  LoginUserDTO,
+  LoginUserDTO as LoginLocalUserDTO,
+  AuthType,
 } from 'user/interfaces/user.interface';
 import { PerformerDocument } from 'schemas/performer.schema';
 import { PerformerService } from 'performer/performer.service';
+// import { Profile as FacebookProfile } from 'passport-facebook';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectModel('User') private userModel: Model<UserDocument>,
-    private performerService: PerformerService
+    private performerService: PerformerService,
   ) {}
+  // public async findOrCreateFacebook(profile: FacebookProfile) {}
+  public async registerLocal(createUser: CreateLocalUserDTO): Promise<User> {
+    const authType: AuthType = {
+      authType: 'local',
+      password: createUser.password,
+    };
 
-  public async registerUser(createUser: CreateUserDTO): Promise<User> {
     const createdUser = new this.userModel({
-      ...createUser,
+      auth: authType,
+      email: createUser.email.toLowerCase(),
+      nickName: createUser.nickName,
       enabled: JSON.parse(process.env.AUTO_ACTIVATE_USERS || 'true'),
     });
+    
     let user: UserDocument | undefined;
     try {
       user = await createdUser.save();
@@ -36,15 +46,16 @@ export class UserService {
     return user;
   }
 
-  public async validateUser(
-    loginData: LoginUserDTO,
+  public async validateLocalUser(
+    loginData: LoginLocalUserDTO,
   ): Promise<UserDocument | undefined> {
     let userAttemptLogin: UserDocument | undefined;
 
     if (loginData.email) {
       userAttemptLogin = await this.userModel
         .findOne({
-          lowercaseEmail: loginData.email.toLowerCase(),
+          "auth.authType": "local",
+          email: loginData.email.toLowerCase()
         })
         .select('+password');
     }
@@ -63,7 +74,7 @@ export class UserService {
 
     if (isMatch) {
       const result = userAttemptLogin;
-      delete result.password;
+      delete result.auth.password;
       userAttemptLogin.lastSeenAt = Date.now();
       userAttemptLogin.save();
       return result;
@@ -72,7 +83,7 @@ export class UserService {
     return undefined;
   }
 
-  async getUserByID(id: string): Promise<UserDocument> {
+  async getUserByID(id: string): Promise<UserDocument | null> {
     let findUserById: UserDocument | undefined;
 
     try {

@@ -12,11 +12,26 @@ export class UserDeserializerMiddleware implements NestMiddleware {
         const userDocument = await this.userService.getUserByID(
           req.session.passport.userId,
         );
-        req.user = {
-          email: userDocument.email,
-          nickName: userDocument.nickName,
-          id: userDocument.id,
-        };
+
+          if (userDocument === null) {
+            req.session.destroy((err) => {
+              if (!err) {
+                throw err;
+              }
+            })
+          } else {
+            req.user = {
+              _id: userDocument.id,
+              email: userDocument.email,
+              enabled: userDocument.enabled,
+              firstName: userDocument.firstName,
+              lastName: userDocument.lastName,
+              lastSeenAt: userDocument.lastSeenAt,
+              nickName: userDocument.nickName,
+              performer: userDocument.performer,
+              phoneNumber: userDocument.phoneNumber
+            };
+          }
       } catch (err) {
         if (err instanceof NotFoundException) {
           req.session.destroy(err => {
