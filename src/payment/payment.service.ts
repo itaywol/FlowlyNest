@@ -8,7 +8,10 @@ import {
   IUpdatePaymentPlanDTO,
 } from './interfaces/payment.interfaces';
 import { PerformerService } from 'performer/performer.service';
-import { PaymentPlanDocument } from 'schemas/payment.schema';
+import {
+  PaymentPlanDocument,
+  TransactionDocument,
+} from 'schemas/payment.schema';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import {
@@ -31,6 +34,8 @@ export class PaymentService {
     private userService: UserService,
     @InjectModel('PaymentPlan')
     private paymentPlanModel: Model<PaymentPlanDocument>,
+    @InjectModel('Transactions')
+    private transactionsModel: Model<TransactionDocument>,
   ) {
     this.braintreeGateway = connect({
       environment: Environment.Sandbox,
@@ -52,8 +57,14 @@ export class PaymentService {
     return await this.paymentPlanModel.findById(planId);
   }
 
-  async getPaymentAmountByPlanId(planId: string): Promise<number | undefined> {
-    return (await this.getPaymentPlanById(planId)).price;
+  async getPaymentAmountByPlanId(
+    planId: string,
+  ): Promise<{ price: number; worth: number } | undefined> {
+    const {
+      price,
+      worth: { total },
+    } = await this.getPaymentPlanById(planId);
+    return { price, worth: total };
   }
 
   async getPaymentPlans(): Promise<PaymentPlan[] | undefined> {
@@ -106,6 +117,12 @@ export class PaymentService {
     return targetPlan != undefined;
   }
 
+  async purchasedPlan(planId: string) {
+    await this.paymentPlanModel.findByIdAndUpdate(planId, {
+      $inc: { purchases: 1 },
+    });
+  }
+
   async getToken() {
     return await this.braintreeGateway.clientToken.generate({});
   }
@@ -121,9 +138,18 @@ export class PaymentService {
      * Extract amount by plan or amount
      */
     let amount: number | undefined;
-    if (!amount && data.paymentPlanID)
-      amount = await this.getPaymentAmountByPlanId(data.paymentPlanID);
-    if (!amount && data.paymentAmount) amount = data.paymentAmount;
+    let charge: number | undefined;
+    if (!amount && data.paymentPlanID) {
+      const { price, worth } = await this.getPaymentAmountByPlanId(
+        data.paymentPlanID,
+      );
+      amount = price;
+      charge = worth;
+    }
+    if (!amount && data.paymentAmount) {
+      amount = data.paymentAmount;
+      charge = data.paymentAmount;
+    }
     if (!amount) throw new HttpException('Couldnt get checkout amount', 500);
 
     /*
@@ -140,16 +166,19 @@ export class PaymentService {
 
     /*
      * Handle Transaction Result
-     * TODO: get amount to charge based on payment amount or payment plan
-     * TODO: charge user account
      * TODO: return restful response
+     * TODO: Record transaction in db
      */
     if (transaction.success) {
-      this.userService.addBalanceToUser(purchaserId, amount);
+      this.userService.addBalanceToUser(purchaserId, charge);
+      if (data.paymentPlanID) this.purchasedPlan(data.paymentPlanID);
+      await this.transactionsModel.create({ entry: transaction });
+      return transaction;
     }
 
     if (transaction.errors) {
-      console.error(transaction);
+      await this.transactionsModel.create({ entry: transaction });
+      return transaction;
     }
   }
 

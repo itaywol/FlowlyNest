@@ -1,8 +1,13 @@
 import { Document, Schema } from 'mongoose';
 import { PaymentPlan } from 'payment/interfaces/payment.interfaces';
+import { Transaction } from 'braintree';
 
 export interface PaymentPlanDocument extends PaymentPlan, Document {
   purchases: number;
+}
+
+export interface TransactionDocument extends Document {
+  entry: Transaction;
 }
 
 export const PaymentPlanSchema = new Schema(
@@ -17,6 +22,13 @@ export const PaymentPlanSchema = new Schema(
       },
     },
     purchases: { type: Number, default: 0 },
+  },
+  { timestamps: true },
+);
+
+export const TransactionSchema = new Schema(
+  {
+    entry: { type: Schema.Types.Mixed },
   },
   { timestamps: true },
 );
