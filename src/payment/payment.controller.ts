@@ -18,10 +18,14 @@ import {
   PaymentPlan,
 } from './interfaces/payment.interfaces';
 import { RequestWithAuth } from 'user/interfaces/user.interface';
+import { QueuesService } from 'queues/queues.service';
 
 @Controller('payment')
 export class PaymentController {
-  constructor(private paymentService: PaymentService) {}
+  constructor(
+    private paymentService: PaymentService,
+    private queuesService: QueuesService,
+  ) {}
 
   ///
   //PAYMENT PLANS
@@ -59,7 +63,11 @@ export class PaymentController {
   }
   @Post('checkout')
   async checkout(@Req() req: RequestWithAuth, @Body() data: ICreatePaymentDTO) {
-    return await this.paymentService.checkout(req.user.id, data);
+    await this.queuesService.createPayment({
+      purchaserId: req.user.id,
+      ...data,
+    });
+    return true;
   }
 
   @Post('payout')

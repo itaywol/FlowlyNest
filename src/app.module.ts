@@ -18,6 +18,7 @@ import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middle
 import { ChatModule } from './chat/chat.module';
 import { ChatGateway } from './chat.gateway';
 import { PaymentModule } from './payment/payment.module';
+import { QueuesModule } from './queues/queues.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { PaymentModule } from './payment/payment.module';
     ChatModule,
     PaymentModule,
     PassportModule,
+    QueuesModule,
   ],
   controllers: [AppController],
   providers: [AppService, ChatGateway],
