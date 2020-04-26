@@ -1,4 +1,4 @@
-import { Injectable, HttpException, Inject } from '@nestjs/common';
+import { Injectable, HttpException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from 'schemas/user.schema';
@@ -7,11 +7,13 @@ import {
   User,
   UpdateUserDTO,
   LoginUserDTO as LoginLocalUserDTO,
+  AuthTypes,
+  UserDto,
   AuthType,
 } from 'user/interfaces/user.interface';
 import { PerformerDocument } from 'schemas/performer.schema';
 import { PerformerService } from 'performer/performer.service';
-// import { Profile as FacebookProfile } from 'passport-facebook';
+import { Profile as FacebookProfile } from 'passport-facebook';
 
 @Injectable()
 export class UserService {
@@ -19,7 +21,17 @@ export class UserService {
     @InjectModel('User') private userModel: Model<UserDocument>,
     private performerService: PerformerService,
   ) {}
-  // public async findOrCreateFacebook(profile: FacebookProfile) {}
+  public async findOrCreateFacebook(profile: FacebookProfile): Promise<UserDto | null> {
+
+      const user = await this.userModel.findOne({email: profile.emails[0].value}).exec()
+      debugger;
+      if (user.auth.authType !== "facebook" || user.auth.facebook !== profile.id) {
+        throw new HttpException("Email already used by another account.", 401);
+      }
+
+      return user;
+  }
+
   public async registerLocal(createUser: CreateLocalUserDTO): Promise<User> {
     const authType: AuthType = {
       authType: 'local',
@@ -56,8 +68,7 @@ export class UserService {
         .findOne({
           "auth.authType": "local",
           email: loginData.email.toLowerCase()
-        })
-        .select('+password');
+        });
     }
 
     if (userAttemptLogin && userAttemptLogin.enabled === false) {
@@ -74,7 +85,7 @@ export class UserService {
 
     if (isMatch) {
       const result = userAttemptLogin;
-      delete result.auth.password;
+      delete (result.auth as AuthTypes.Local).password;
       userAttemptLogin.lastSeenAt = Date.now();
       userAttemptLogin.save();
       return result;

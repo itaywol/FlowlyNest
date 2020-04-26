@@ -1,9 +1,9 @@
 import { Performer } from 'performer/interfaces/performer.interface';
 import { Request } from "express"
 
-export type AuthType = AuthTypes.Local | AuthTypes.Local;
+export type AuthType = AuthTypes.Local | AuthTypes.Facebook;
 
-declare namespace AuthTypes {
+export declare namespace AuthTypes {
   interface Local {
     authType: "local";
     password?: string;

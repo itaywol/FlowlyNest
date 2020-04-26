@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Session,
   Get,
   Req,
   UseGuards,
@@ -10,23 +9,27 @@ import {
 } from '@nestjs/common';
 import { UserDto, RequestWithAuth } from 'user/interfaces/user.interface';
 import { LocalAuthGuard } from '../passport-strategies/local.strategy';
+import { AuthService } from './auth.service';
+import { FacebookAuthGuard } from 'passport-strategies/facebook.startegy';
 
 @Controller('auth')
 export class AuthController {
-  constructor() {}
+  constructor(private authService: AuthService) {}
+
+  @Get('facebook')
+  @UseGuards(new FacebookAuthGuard())
+  async facebook(
+    @Req() req: RequestWithAuth
+  ): Promise<UserDto> {  
+    return this.authService.loginUser(req);
+  }
 
   @Post()
   @UseGuards(new LocalAuthGuard())
   async loginUser(
     @Req() req: RequestWithAuth
   ): Promise<UserDto> {
-    req.session.passport = {
-      userId: req.user._id,
-    };
-
-    // TODO: DELETE OTHER SESSIONS
-
-    return req.user;
+    return this.authService.loginUser(req);
   }
 
   @Get()
@@ -42,11 +45,11 @@ export class AuthController {
   }
 
   @Delete()
-  async logoutUser(@Session() session: Express.Session) {
-    session.destroy(err => {
-      if (err) {
+  async logoutUser(@Req() req: RequestWithAuth) {
+    req.session.destroy((err) => {
+      if (!err) {
         throw err;
       }
-    });
+    })
   }
 }

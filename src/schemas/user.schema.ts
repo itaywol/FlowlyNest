@@ -51,18 +51,19 @@ export const UserSchema = new Schema(
 
 UserSchema.pre<UserDocument>('save', function(next) {
   const user = this;
-
-  if (user.auth.authType === 'local' && user.isModified('auth.password')) {
+  const userAuth = user.auth;
+  
+  if (userAuth.authType === 'local' && user.isModified('auth.password')) {
     bcrypt.genSalt(10, (genSaltError, salt) => {
       if (genSaltError) {
         return next(genSaltError);
       }
 
-      bcrypt.hash(user.auth.password, salt, (err, hash) => {
+      bcrypt.hash(userAuth.password, salt, (err, hash) => {
         if (err) {
           return next(err);
         }
-        user.auth.password = hash;
+        userAuth.password = hash;
         next();
       });
     });

@@ -17,7 +17,7 @@ function initMiddlewares(app: INestApplication) {
   app.use(
     expressSession({
       secret: process.env.SESSION_SECRET || 'henriIsTheMostEvilCatInTheWorld',
-      name: process.env.SESSION_COOKIE_NAME || 'performa_auth',
+      name: 'auth',
       store: new MongoStore({
         stringify: false,
         url: process.env.MONGO_URI
