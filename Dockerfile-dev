@@ -1,9 +1,0 @@
-FROM node:latest AS RUNNER
-
-WORKDIR /usr/src/app
-
-COPY . .
-
-RUN npm i
-
-CMD npm run start:dev
