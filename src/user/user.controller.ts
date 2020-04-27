@@ -51,11 +51,6 @@ export class UserController {
     return (await this.userService.getUserByID(id)) as User;
   }
 
-  @Post(':id/performer')
-  public async makePerformerAccount(@Param('id') id: string): Promise<User> {
-    return (await this.userService.makeUserPerformer(id)) as User;
-  }
-
   @Put()
   @UseGuards(AuthGuard())
   public async updateMyProfile(

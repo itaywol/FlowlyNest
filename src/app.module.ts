@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { WinstonModule } from 'nest-winston';
 import { DatabaseModule } from './database/database.module';
-import { PerformerModule } from './performer/performer.module';
 import { PerformanceModule } from './performance/performance.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { winstonConfig } from './logger';
@@ -24,7 +23,6 @@ import { PaymentModule } from './payment/payment.module';
     PassportModule.register({ session: false }),
     DatabaseModule,
     UserModule,
-    PerformerModule,
     PerformanceModule,
     TransactionsModule,
     StreamManagerModule,

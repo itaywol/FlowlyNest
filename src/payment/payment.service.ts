@@ -7,7 +7,6 @@ import {
   ICreatePaymentPlanDTO,
   IUpdatePaymentPlanDTO,
 } from './interfaces/payment.interfaces';
-import { PerformerService } from 'performer/performer.service';
 import {
   PaymentPlanDocument,
   TransactionDocument,
@@ -22,15 +21,14 @@ import {
   ValidatedResponse,
   Transaction,
 } from 'braintree';
-import { PerformerDocument } from 'schemas/performer.schema';
 import { UserService } from 'user/user.service';
+import { UserDocument } from 'schemas/user.schema';
 
 @Injectable()
 export class PaymentService {
   private braintreeGateway: BraintreeGateway;
   private paypalClient: any;
   constructor(
-    private performerService: PerformerService,
     private userService: UserService,
     @InjectModel('PaymentPlan')
     private paymentPlanModel: Model<PaymentPlanDocument>,
@@ -184,15 +182,13 @@ export class PaymentService {
 
   //TODO: currency selection and conversion
   async withdraw(_id: string, amount: number) {
-    const performer: PerformerDocument = await this.performerService.getPerformerById(
-      _id,
-    );
+    const user: UserDocument = await this.userService.getUserByID(_id);
 
-    if (amount > performer.user.balance.currentBalance)
+    if (amount > user.performer.balance.currentBalance)
       throw new HttpException('Payout amount higher then holdings', 401);
 
     const dedactBalace = await this.userService.takeBalanceFromUser(
-      performer.user._id,
+      user._id,
       amount,
     );
     if (!dedactBalace)
@@ -220,7 +216,7 @@ export class PaymentService {
             currency: 'USD',
             value: amount,
           },
-          receiver: performer.paypal.email || performer.user.email,
+          receiver: user.performer.paypal.email || user.email,
           // eslint-disable-next-line @typescript-eslint/camelcase
           sender_item_id: `${amount} eBalance withdrawl`,
         },

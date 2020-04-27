@@ -1,10 +1,9 @@
 import { Model, model, Schema, Query, Document } from 'mongoose';
+import { uidSync } from 'uid-ts';
 import * as bcrypt from 'bcrypt';
 import { User } from 'user/interfaces/user.interface';
-import { Performer } from 'performer/interfaces/performer.interface';
 
 export interface UserDocument extends User, Document {
-  performer: Performer;
   password: string;
   lowercaseEmail: string;
   lowercaseNickName: string;
@@ -17,6 +16,10 @@ export interface UserDocument extends User, Document {
 }
 export interface IUserModel extends Model<UserDocument> {
   validateEmail(email: string): boolean;
+}
+function GenerateStreamKey(length: number) {
+  const enc: string = uidSync(length);
+  return `${process.env.STREAM_KEYS_PREFIX || 'Performa'}_${enc}`;
 }
 
 function validateEmail(email: string) {
@@ -45,9 +48,31 @@ export const UserSchema = new Schema(
     lowercaseNickName: { type: String, unique: true, select: false },
     phoneNumber: { type: String, required: false },
     performer: {
-      type: Schema.Types.ObjectId,
-      ref: 'Performer',
-      required: false,
+      paypal: {
+        email: { type: String },
+        phoneNumber: { type: String },
+      },
+      balance: {
+        currentBalance: { type: Number, required: true, default: 0 },
+        transactions: [{ type: Schema.Types.ObjectId, ref: 'Transactions' }],
+      },
+      stream: {
+        title: { type: String, required: true, default: 'my stream' },
+        secretKey: {
+          type: String,
+          required: true,
+          default: GenerateStreamKey(48),
+        },
+        live: { type: Boolean, default: false },
+        settings: {
+          public: { type: Boolean, default: false },
+          pricing: { type: Number, default: 10 },
+          maxViewers: {
+            enabled: { type: Boolean, default: true },
+            amount: { type: Number, default: 8 },
+          },
+        },
+      },
     },
     balance: {
       currentBalance: { type: Number, required: true, default: 0 },
@@ -141,6 +166,9 @@ UserSchema.methods.checkPassword = function(
 
 UserSchema.statics.validateEmail = function(email: string): boolean {
   return validateEmail(email);
+};
+UserSchema.statics.GenerateStreamkey = function(length: number): string {
+  return GenerateStreamKey(length);
 };
 
 export const UserModel: IUserModel = model<UserDocument, IUserModel>(

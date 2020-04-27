@@ -8,15 +8,10 @@ import {
   UpdateUserDTO,
   LoginUserDTO,
 } from 'user/interfaces/user.interface';
-import { PerformerDocument } from 'schemas/performer.schema';
-import { PerformerService } from 'performer/performer.service';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel('User') private userModel: Model<UserDocument>,
-    private performerService: PerformerService,
-  ) {}
+  constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
 
   public async registerUser(createUser: CreateUserDTO): Promise<User> {
     const createdUser = new this.userModel({
@@ -84,27 +79,6 @@ export class UserService {
     return findUserById;
   }
 
-  async makeUserPerformer(id: string): Promise<UserDocument> {
-    const findUser: UserDocument = await this.getUserByID(id);
-    findUser.populate('performer');
-    if (findUser.performer) throw new HttpException('Already performer', 401);
-
-    if (findUser) {
-      try {
-        const performerModel: PerformerDocument = await this.performerService.makeUserPerformer(
-          findUser._id,
-        );
-        findUser.performer = performerModel._id;
-        await findUser.save();
-        return findUser;
-      } catch (Error) {
-        throw new HttpException('Couldnt make performer', 404);
-      }
-    }
-
-    return findUser;
-  }
-
   async updateUser(_id: string, updateUserData: UpdateUserDTO): Promise<User> {
     const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
       _id,
@@ -134,5 +108,17 @@ export class UserService {
     );
 
     return updateUser;
+  }
+  public async getUserByStreamSecret(secret: string): Promise<UserDocument> {
+    const user: UserDocument = await this.userModel.findOne({
+      'performer.stream.secretKey': secret,
+    });
+
+    return user;
+  }
+
+  public async getPerformerEntryFee(userId: string): Promise<number> {
+    const user: UserDocument = await this.userModel.findById(userId);
+    return user.performer.stream.settings.pricing;
   }
 }

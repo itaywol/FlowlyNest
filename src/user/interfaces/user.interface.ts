@@ -1,5 +1,27 @@
-import { Performer } from 'performer/interfaces/performer.interface';
 import { Request } from 'express';
+export interface StreamSettings {
+  pricing: number;
+}
+export interface Stream {
+  title: string;
+  secretKey: string;
+  live: boolean;
+  settings: StreamSettings;
+}
+export interface Paypal {
+  email: string;
+  phoneNumber: string;
+}
+export interface Performer {
+  stream: Stream;
+  paypal: Paypal;
+  balance: {
+    currentBalance: number;
+    transactions: any;
+  };
+  //TODO: switch to performances type
+  performances: string[];
+}
 
 export interface User {
   _id: any;
