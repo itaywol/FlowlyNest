@@ -13,7 +13,6 @@ import { Logger } from 'winston';
 import { Inject, UseGuards } from '@nestjs/common';
 import sharedsession = require('express-socket.io-session');
 import { session } from 'main';
-import { AuthGuard } from 'middlewares/auth.guard';
 
 @WebSocketGateway(parseInt(process.env.PORT_WS) || 3001, {
   namespace: 'chat',
