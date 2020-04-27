@@ -55,7 +55,7 @@ export class PaymentGateway
     );
   }
 
-  async paymentResponse(userId: string, data: any) {
-    this.server.to(userId).emit('PaymentStatus', data);
+  async emitMessage(userId: string, eventName: string, data: any) {
+    this.server.to(userId).emit(eventName, data);
   }
 }

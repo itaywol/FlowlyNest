@@ -14,7 +14,7 @@ export class PaymentConsumer {
   async handlePayment(job: Job<IQueueCreatePaymentDTO>) {
     const { purchaserId, ...rest } = job.data;
     const data = await this.paymentService.checkout(purchaserId, rest);
-    this.paymentGateway.paymentResponse(purchaserId, data);
+    this.paymentGateway.emitMessage(purchaserId, 'PaymentStatus', data);
 
     return data;
   }
