@@ -45,14 +45,15 @@ export class PaymentGateway
     this.logger.info(`${user.nickName} has connected`);
     client.join(user._id);
   }
-  handleDisconnect(@ConnectedSocket() client: Socket) {
+  async handleDisconnect(@ConnectedSocket() client: Socket) {
     // Disconnect any connection if isnt a logged in user
+    const user: User = await this.userService.getUserByID(
+      client.handshake.session.passport.userId,
+    );
     if (!client.handshake.session.passport) {
       client.disconnect();
     }
-    this.logger.info(
-      `${client.handshake.session.passport.userId} has disconnected`,
-    );
+    this.logger.info(`${user.nickName} has disconnected`);
   }
 
   async emitMessage(userId: string, eventName: string, data: any) {
