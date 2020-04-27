@@ -16,7 +16,6 @@ import { StrategiesModule } from 'passport-strategies/strategies.module';
 import { PassportModule } from '@nestjs/passport';
 import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middleware';
 import { ChatModule } from './chat/chat.module';
-import { ChatGateway } from './chat.gateway';
 import { PaymentModule } from './payment/payment.module';
 
 @Module({
@@ -37,7 +36,7 @@ import { PaymentModule } from './payment/payment.module';
     PassportModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ChatGateway],
+  providers: [AppService],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

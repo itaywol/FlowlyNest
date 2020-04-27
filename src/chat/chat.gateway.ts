@@ -10,12 +10,13 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from 'winston';
-import { Inject, UseGuards } from '@nestjs/common';
+import { Inject } from '@nestjs/common';
 import sharedsession = require('express-socket.io-session');
 import { session } from 'main';
 
-@WebSocketGateway(parseInt(process.env.PORT_WS) || 3001, {
+@WebSocketGateway(parseInt(process.env.BACK_WS_PORT || '3001'), {
   namespace: 'chat',
+  path: '/sock',
 })
 export class ChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {

@@ -7,6 +7,7 @@ import { PaymentPlanSchema, TransactionSchema } from 'schemas/payment.schema';
 import { UserModule } from 'user/user.module';
 import { PaymentProducer } from './payment.producer';
 import { PaymentConsumer } from './payment.consumer';
+import { PaymentGateway } from './payment.gateway';
 import { BullModule } from '@nestjs/bull';
 
 @Module({
@@ -27,6 +28,6 @@ import { BullModule } from '@nestjs/bull';
     ]),
   ],
   controllers: [PaymentController],
-  providers: [PaymentService, PaymentProducer, PaymentConsumer],
+  providers: [PaymentService, PaymentProducer, PaymentConsumer, PaymentGateway],
 })
 export class PaymentModule {}
