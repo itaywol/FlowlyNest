@@ -1,14 +1,19 @@
-import { Processor, Process } from '@nestjs/bull';
-import { Job } from 'bull';
-import { PaymentService } from './payment.service';
-import { IQueueCreatePaymentDTO } from 'queues/queues.service';
+import { Injectable } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { ICreatePaymentDTO } from './interfaces/payment.interfaces';
+import Bull = require('bull');
 
-@Processor('payments')
+export interface IQueueCreatePaymentDTO extends ICreatePaymentDTO {
+  purchaserId: string;
+}
+@Injectable()
 export class PaymentProducer {
-  constructor(private paymentService: PaymentService) {}
-  @Process()
-  async handlePayment(job: Job<IQueueCreatePaymentDTO>) {
-    const { purchaserId, ...rest } = job.data;
-    this.paymentService.checkout(purchaserId, rest);
+  constructor(@InjectQueue('payments') private paymentsQueue: Queue) {}
+
+  async createPayment(data: IQueueCreatePaymentDTO): Promise<boolean> {
+    const job: Bull.Job<any> = await this.paymentsQueue.add(data);
+
+    return await job.isCompleted();
   }
 }
