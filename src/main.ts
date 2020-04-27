@@ -27,7 +27,7 @@ export const session = expressSession({
     ),
     httpOnly: true,
     secure: isProduction(),
-    sameSite: true,
+    sameSite: 'none',
     domain: process.env.PUBLIC_DOMAIN || 'localhost',
   },
 });
