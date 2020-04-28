@@ -9,6 +9,7 @@ import {
   HttpException,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import {
   User,
@@ -46,9 +47,16 @@ export class UserController {
     return req.user;
   }
 
-  @Get(':id')
-  public async getUserByID(@Param('id') id: string): Promise<User> {
-    return (await this.userService.getUserByID(id)) as User;
+  @Get()
+  public async getUserByID(
+    @Query('id') id: string,
+    @Query('nickName') nickName: string,
+  ): Promise<UserDto> {
+    if (id) return (await this.userService.getUserByID(id)) as UserDto;
+    if (nickName)
+      return (await this.userService.getUserByNickname(nickName)) as UserDto;
+
+    throw new HttpException('Must provide query', 401);
   }
 
   @Put()

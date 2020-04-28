@@ -7,6 +7,7 @@ import {
   User,
   UpdateUserDTO,
   LoginUserDTO,
+  UserDto,
 } from 'user/interfaces/user.interface';
 
 @Injectable()
@@ -117,8 +118,14 @@ export class UserService {
     return user;
   }
 
-  public async getPerformerEntryFee(userId: string): Promise<number> {
+  public async getUserEntryFee(userId: string): Promise<number> {
     const user: UserDocument = await this.userModel.findById(userId);
     return user.performer.stream.settings.pricing;
+  }
+
+  public async getUserByNickname(nickName: string): Promise<UserDto> {
+    const user: UserDocument = await this.userModel.findOne({ nickName });
+
+    return user as UserDto;
   }
 }
