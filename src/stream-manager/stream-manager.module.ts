@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { StreamManagerController } from './stream-manager.controller';
-import { PerformerModule } from 'performer/performer.module';
+import { UserModule } from 'user/user.module';
 
 @Module({
-  imports: [PerformerModule],
+  imports: [UserModule],
   controllers: [StreamManagerController],
 })
 export class StreamManagerModule {}

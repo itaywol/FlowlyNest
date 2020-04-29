@@ -5,7 +5,6 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { WinstonModule } from 'nest-winston';
 import { DatabaseModule } from './database/database.module';
-import { PerformerModule } from './performer/performer.module';
 import { PerformanceModule } from './performance/performance.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { winstonConfig } from './logger';
@@ -15,6 +14,8 @@ import { FileUploadModule } from './file-upload/file-upload.module';
 import { StrategiesModule } from 'passport-strategies/strategies.module';
 import { PassportModule } from '@nestjs/passport';
 import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middleware';
+import { ChatModule } from './chat/chat.module';
+import { PaymentModule } from './payment/payment.module';
 
 @Module({
   imports: [
@@ -22,13 +23,15 @@ import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middle
     PassportModule.register({ session: false }),
     DatabaseModule,
     UserModule,
-    PerformerModule,
     PerformanceModule,
     TransactionsModule,
     StreamManagerModule,
     AuthModule,
     FileUploadModule,
     StrategiesModule,
+    ChatModule,
+    PaymentModule,
+    PassportModule,
   ],
   controllers: [AppController],
   providers: [AppService],

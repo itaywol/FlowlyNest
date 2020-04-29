@@ -6,9 +6,7 @@ import { use } from 'passport';
 
 @Injectable()
 export class LocalStrategy {
-  constructor(
-    readonly userService: UserService,
-  ) {
+  constructor(readonly userService: UserService) {
     use(
       'local',
       new Strategy(

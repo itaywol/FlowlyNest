@@ -13,24 +13,25 @@ export class UserDeserializerMiddleware implements NestMiddleware {
           req.session.passport.userId,
         );
 
-          if (userDocument === null) {
-            req.session.destroy((err) => {
-              if (!err) {
-                throw err;
-              }
-            })
-          } else {
-            req.user = {
-              _id: userDocument.id,
-              email: userDocument.email,
-              enabled: userDocument.enabled,
-              firstName: userDocument.firstName,
-              lastName: userDocument.lastName,
-              lastSeenAt: userDocument.lastSeenAt,
-              nickName: userDocument.nickName,
-              performer: userDocument.performer
-            };
-          }
+        if (userDocument === null) {
+          req.session.destroy(err => {
+            if (!err) {
+              throw err;
+            }
+          });
+        } else {
+          req.user = {
+            _id: userDocument.id,
+            email: userDocument.email,
+            enabled: userDocument.enabled,
+            firstName: userDocument.firstName,
+            lastName: userDocument.lastName,
+            lastSeenAt: userDocument.lastSeenAt,
+            nickName: userDocument.nickName,
+            performer: userDocument.performer,
+            balance: userDocument.balance,
+          };
+        }
       } catch (err) {
         if (err instanceof NotFoundException) {
           req.session.destroy(err => {

@@ -4,8 +4,8 @@ import {
   Get,
   Req,
   UseGuards,
-  Delete,
   HttpException,
+  Delete,
 } from '@nestjs/common';
 import { UserDto, RequestWithAuth } from 'user/interfaces/user.interface';
 import { LocalAuthGuard } from '../passport-strategies/local.strategy';
@@ -35,10 +35,7 @@ export class AuthController {
   @Get()
   async getUser(@Req() req: RequestWithAuth): Promise<UserDto> {
     if (req.user === undefined) {
-      throw new HttpException(
-        'Not logged in',
-        401,
-      );
+      throw new HttpException('Not logged in', 401);
     } else {
       return req.user as UserDto;
     }
@@ -48,6 +45,7 @@ export class AuthController {
   async logoutUser(@Req() req: RequestWithAuth) {
     req.session.destroy((err) => {
       if (!err) {
+
         throw err;
       }
     })

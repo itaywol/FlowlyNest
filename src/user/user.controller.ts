@@ -8,8 +8,15 @@ import {
   Body,
   HttpException,
   UseGuards,
+  Req,
 } from '@nestjs/common';
-import { User, UpdateUserDTO, CreateUserDTO } from './interfaces/user.interface';
+import {
+  User,
+  UpdateUserDTO,
+  CreateUserDTO,
+  RequestWithAuth,
+  UserDto,
+} from './interfaces/user.interface';
 import { UserService } from './user.service';
 import { Personalized } from 'personalized.decorator';
 import { AuthGuard } from '@nestjs/passport';
@@ -30,24 +37,18 @@ export class UserController {
     session.passport = {
       userId: createdUser._id,
     };
-    
+
     return createdUser._id;
   }
-  
+
   @Get()
-  @UseGuards(AuthGuard())
-  public async myUser(@Session() session: Express.Session): Promise<User> {
-    return await session.user;
+  public async myUser(@Req() req: RequestWithAuth): Promise<UserDto> {
+    return req.user;
   }
 
   @Get(':id')
   public async getUserByID(@Param('id') id: string): Promise<User> {
     return (await this.userService.getUserByID(id)) as User;
-  }
-
-  @Post(':id/performer')
-  public async makePerformerAccount(@Param('id') id: string): Promise<User> {
-    return (await this.userService.makeUserPerformer(id)) as User;
   }
 
   @Put()

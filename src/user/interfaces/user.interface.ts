@@ -1,5 +1,27 @@
-import { Performer } from 'performer/interfaces/performer.interface';
-import { Request } from "express"
+import { Request } from 'express';
+export interface StreamSettings {
+  pricing: number;
+}
+export interface Stream {
+  title: string;
+  secretKey: string;
+  live: boolean;
+  settings: StreamSettings;
+}
+export interface Paypal {
+  email: string;
+  phoneNumber: string;
+}
+export interface Performer {
+  stream: Stream;
+  paypal: Paypal;
+  balance: {
+    currentBalance: number;
+    transactions: any;
+  };
+  //TODO: switch to performances type
+  performances: string[];
+}
 
 export type AuthType = AuthTypes.Local | AuthTypes.Facebook;
 
@@ -24,6 +46,9 @@ export interface UserDto {
   enabled: boolean;
   performer: Performer;
   lastSeenAt: number;
+  balance: {
+    currentBalance: number;
+  };
 }
 
 export interface User extends UserDto {
@@ -51,3 +76,4 @@ export interface UpdateUserDTO {
 export interface RequestWithAuth extends Request {
   user: UserDto;
 }
+

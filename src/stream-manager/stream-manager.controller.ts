@@ -4,14 +4,15 @@ import {
   Get,
   Body,
   Res,
-  Session,
   HttpException,
   Inject,
+  Req,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { PerformerService } from 'performer/performer.service';
-import { PerformerDocument } from 'schemas/performer.schema';
 import { Logger } from 'winston';
+import { UserDocument } from 'schemas/user.schema';
+import { UserService } from 'user/user.service';
+import { RequestWithAuth } from 'user/interfaces/user.interface';
 
 // POST data interface for requests from rtmp server
 export interface RTMPData {
@@ -28,24 +29,24 @@ export interface RTMPData {
 @Controller('stream')
 export class StreamManagerController {
   constructor(
-    private performerService: PerformerService,
     @Inject('winston') private logger: Logger,
+    private userService: UserService,
   ) {}
 
   @Post('start')
   public async streamStart(@Res() res: Response, @Body() data: RTMPData) {
     const name: string | undefined = data.name;
 
-    const performer: PerformerDocument = await this.performerService.getPerformerBySecret(
+    const user: UserDocument = await this.userService.getUserByStreamSecret(
       name,
     );
-    if (!performer) return res.status(401).send();
+    if (!user) return res.status(401).send();
 
-    const redirectName: string | undefined = performer.user.nickName;
+    const redirectName: string | undefined = user.nickName;
     if (!redirectName) return res.status(401).send();
 
-    performer.stream.live = true;
-    await performer.save();
+    user.performer.stream.live = true;
+    await user.save();
 
     this.logger.info(`${redirectName} is streaming`);
     return res.redirect(process.env.RTMP_INNER_URL + redirectName);
@@ -56,21 +57,21 @@ export class StreamManagerController {
   @Post('end')
   public async streamEnd(@Body() data: RTMPData) {
     const name: string | undefined = data.name;
-    const performer:
-      | PerformerDocument
-      | undefined = await this.performerService.getPerformerBySecret(name);
-    const redirectName: string | undefined = performer.user.nickName;
-    performer.stream.live = false;
-    await performer.save();
+    const user:
+      | UserDocument
+      | undefined = await this.userService.getUserByStreamSecret(name);
+    const redirectName: string | undefined = user.nickName;
+    user.performer.stream.live = false;
+    await user.save();
     this.logger.info(`${redirectName} has stopped streaming`);
   }
 
   // Get route to check if user is authenticated
   // For nginx auth_request purposes
   @Get('auth')
-  public async auth(@Session() session: Express.Session) {
+  public async auth(@Req() req: RequestWithAuth) {
     if (process.env.WATCHING_STREAM_REQUIRES_AUTH === 'false') return 'ok';
-    if (session.user) return 'ok';
+    if (req.user) return 'ok';
     throw new HttpException('Unauthorized', 401);
   }
 }
