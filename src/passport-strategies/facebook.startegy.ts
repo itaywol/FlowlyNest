@@ -1,4 +1,4 @@
-import { Strategy, Profile } from 'passport-facebook';
+import * as FacebookTokenStrategy from 'passport-facebook-token';
 import { AuthGuard } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { UserService } from 'user/user.service';
@@ -9,11 +9,10 @@ export class FacebookStartegy {
   constructor(readonly userService: UserService) {
     use(
       'facebook',
-      new Strategy(
+      new FacebookTokenStrategy(
         {
-          clientID: '933128667136642',
-          clientSecret: 'b5f645ac5bc377fdd9d90c630e797984',
-          callbackURL: '/login',
+          clientID: '662636214298507',
+          clientSecret: '57a876d5e8864bb49d942829039cc740',
         },
         this.verify,
       ),
@@ -23,7 +22,7 @@ export class FacebookStartegy {
   verify = async (
     _accessToken: string,
     _refreshToken: string,
-    profile: Profile,
+    profile: FacebookTokenStrategy.Profile,
     done: (error: any, user?: any, info?: any) => void,
   ) => {
     try {

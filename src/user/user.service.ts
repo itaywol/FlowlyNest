@@ -13,7 +13,7 @@ import {
 } from 'user/interfaces/user.interface';
 import { PerformerDocument } from 'schemas/performer.schema';
 import { PerformerService } from 'performer/performer.service';
-import { Profile as FacebookProfile } from 'passport-facebook';
+import { Profile as FacebookProfile } from 'passport-facebook-token';
 
 @Injectable()
 export class UserService {
@@ -23,10 +23,36 @@ export class UserService {
   ) {}
   public async findOrCreateFacebook(profile: FacebookProfile): Promise<UserDto | null> {
 
-      const user = await this.userModel.findOne({email: profile.emails[0].value}).exec()
-      debugger;
-      if (user.auth.authType !== "facebook" || user.auth.facebook !== profile.id) {
-        throw new HttpException("Email already used by another account.", 401);
+      let user = await this.userModel.findOne({email: profile.emails[0].value}).exec()
+      if (user === null) {
+        const authType: AuthType = {
+          authType: 'facebook',
+          facebook: profile.id
+        };
+    
+        const createdUser = new this.userModel({
+          auth: authType,
+          email: profile.emails[0].value,
+          nickName: profile.name.givenName + profile.name.familyName,
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName,
+          lastSeenAt: Date.now(),
+          enabled: JSON.parse(process.env.AUTO_ACTIVATE_USERS || 'true'),
+        } as User);
+
+        try {
+          user = await createdUser.save();
+        } catch (error) {
+          console.error(error.message);
+          throw new HttpException(
+            'Error creating user or user already exists',
+            401,
+          );
+        }
+      } else {
+        if (user.auth.authType !== "facebook" || user.auth.facebook !== profile.id) {
+          throw new HttpException("Email already used by another account.", 401);
+        }
       }
 
       return user;

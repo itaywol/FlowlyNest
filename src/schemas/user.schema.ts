@@ -32,7 +32,6 @@ export const UserSchema = new Schema(
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
     nickName: { type: String, required: true, unique: true },
-    phoneNumber: { type: String, required: false },
     performer: {
       type: Schema.Types.ObjectId,
       ref: 'Performer',

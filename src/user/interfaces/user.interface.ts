@@ -21,7 +21,6 @@ export interface UserDto {
   nickName: string;
   firstName: string;
   lastName: string;
-  phoneNumber: string;
   enabled: boolean;
   performer: Performer;
   lastSeenAt: number;
@@ -47,7 +46,6 @@ export interface UpdateUserDTO {
   email: string;
   firstName: string;
   lastName: string;
-  phoneNumber: string;
 }
 
 export interface RequestWithAuth extends Request {

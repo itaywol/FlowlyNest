@@ -28,8 +28,7 @@ export class UserDeserializerMiddleware implements NestMiddleware {
               lastName: userDocument.lastName,
               lastSeenAt: userDocument.lastSeenAt,
               nickName: userDocument.nickName,
-              performer: userDocument.performer,
-              phoneNumber: userDocument.phoneNumber
+              performer: userDocument.performer
             };
           }
       } catch (err) {
