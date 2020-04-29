@@ -17,6 +17,7 @@ import {
   CreateUserDTO,
   RequestWithAuth,
   UserDto,
+  GetUserChannelDTO,
 } from './interfaces/user.interface';
 import { UserService } from './user.service';
 import { Personalized } from 'personalized.decorator';
@@ -57,6 +58,13 @@ export class UserController {
       return (await this.userService.getUserByNickname(nickName)) as UserDto;
 
     throw new HttpException('Must provide query', 401);
+  }
+  @Get('/channel')
+  public async getUserChannel(
+    @Query('nickName') nickName: string,
+  ): Promise<GetUserChannelDTO | null> {
+    if (!nickName) throw new HttpException('Must provide nickName param', 404);
+    return await this.userService.getUserChannel(nickName);
   }
 
   @Put()

@@ -15,6 +15,7 @@ import sharedsession = require('express-socket.io-session');
 import { session } from 'main';
 import { UserService } from 'user/user.service';
 import { User } from 'user/interfaces/user.interface';
+import { ChatProducer } from './chat.producer';
 
 @WebSocketGateway(parseInt(process.env.BACK_WS_PORT || '3001'), {
   namespace: 'chat',
@@ -25,6 +26,7 @@ export class ChatGateway
   constructor(
     @Inject('winston') private logger: Logger,
     private userService: UserService,
+    private chatProducer: ChatProducer,
   ) {}
 
   @WebSocketServer() server: Server;
@@ -71,21 +73,33 @@ export class ChatGateway
     this.server.to(payload.room).emit('onMessageFromServer', {
       sender: user.nickName,
       message: payload.message,
+      createdAt: Date.now(),
+    });
+    this.chatProducer.addMessageToDB({
+      createdAt: Date.now(),
+      message: payload.message,
+      sender: { user: user, nickName: user.nickName },
+      room: payload.room,
     });
   }
 
   @SubscribeMessage('joinRoom')
-  handleJoinRoomRequest(
+  async handleJoinRoomRequest(
     @ConnectedSocket() client: Socket,
     @MessageBody() payload: { room: string },
   ) {
     this.logger.verbose(`${client.id} had joined ${payload.room}`);
     client.join(payload.room);
-    client.emit('joinedRoom', payload.room);
+    const ChatChannel = await this.userService.getUserChannel(payload.room);
+    client.emit('joinedRoom', {
+      room: payload.room,
+      messages: ChatChannel.chat.chatMessages,
+      settings: ChatChannel.chat.chatSettings,
+    });
   }
 
   @SubscribeMessage('leaveRoom')
-  handleLeaveRoomRequest(
+  async handleLeaveRoomRequest(
     @ConnectedSocket() client: Socket,
     @MessageBody() room: string,
   ) {

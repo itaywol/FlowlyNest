@@ -1,10 +1,12 @@
 import { Request } from 'express';
+import { ChannelChatDTO, ChannelChat } from 'chat/interfaces/chat.interfaces';
 export interface StreamSettings {
   pricing: number;
 }
 export interface Stream {
   title: string;
   secretKey: string;
+  chat: ChannelChat;
   live: boolean;
   settings: StreamSettings;
 }
@@ -54,6 +56,11 @@ export interface UserDto {
   };
 }
 
+export interface GetUserChannelDTO {
+  owner: UserDto;
+  chat: ChannelChatDTO;
+}
+
 export interface CreateUserDTO {
   email: string;
   password: string;
@@ -70,4 +77,3 @@ export interface UpdateUserDTO {
 export interface RequestWithAuth extends Request {
   user: UserDto;
 }
-

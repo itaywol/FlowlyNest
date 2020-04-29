@@ -19,7 +19,7 @@ export interface IUserModel extends Model<UserDocument> {
 }
 function GenerateStreamKey(length: number) {
   const enc: string = uidSync(length);
-  return `${process.env.STREAM_KEYS_PREFIX || 'Performa'}_${enc}`;
+  return `${process.env.STREAM_KEYS_PREFIX || 'Flowly'}_${enc}`;
 }
 
 function validateEmail(email: string) {
@@ -64,6 +64,10 @@ export const UserSchema = new Schema(
           default: GenerateStreamKey(48),
         },
         live: { type: Boolean, default: false },
+        chat: {
+          type: Schema.Types.ObjectId,
+          ref: 'Chat',
+        },
         settings: {
           public: { type: Boolean, default: false },
           pricing: { type: Number, default: 10 },
