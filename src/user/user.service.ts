@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UserDocument } from 'schemas/user.schema';
 import { Profile as FacebookProfile } from "passport-facebook-token";
+import { Profile as GoogleProfile } from "passport-google-oauth20";
 import { UserDto, AuthType, User, LoginUserDTO, AuthTypes, UpdateUserDTO, CreateUserDTO, GetUserChannelDTO } from './interfaces/user.interface';
 import { ChatDocument } from 'schemas/chat.schema';
 import { ChannelChatDTO } from 'chat/interfaces/chat.interfaces';
@@ -14,6 +15,42 @@ export class UserService {
     @InjectModel('User') private userModel: Model<UserDocument>,
     @Inject(forwardRef(() => ChatService)) private chatService: ChatService
   ) {}
+  public async findOrCreateGoogle(profile: GoogleProfile): Promise<UserDto | null> {
+    let user = await this.userModel.findOne({email: profile.emails[0].value}).exec()
+    if (user === null) {
+      const authType: AuthType = {
+        authType: 'google',
+        google: profile.id
+      };
+
+      const createdUser = new this.userModel({
+        auth: authType,
+        email: profile.emails[0].value,
+        nickName: profile.name.givenName + profile.name.familyName,
+        firstName: profile.name.givenName,
+        lastName: profile.name.familyName,
+        lastSeenAt: Date.now(),
+        enabled: JSON.parse(process.env.AUTO_ACTIVATE_USERS || 'true'),
+      } as User);
+
+      try {
+        user = await createdUser.save();
+      } catch (error) {
+        console.error(error.message);
+        throw new HttpException(
+          'Error creating user or user already exists',
+          401,
+        );
+      }
+    } else {
+      if (user.auth.authType !== "google" || user.auth.google !== profile.id) {
+        throw new HttpException("Email already used by another account.", 401);
+      }
+    }
+
+    return user;
+}
+
   public async findOrCreateFacebook(profile: FacebookProfile): Promise<UserDto | null> {
 
       let user = await this.userModel.findOne({email: profile.emails[0].value}).exec()

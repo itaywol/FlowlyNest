@@ -11,11 +11,20 @@ import { UserDto, RequestWithAuth } from 'user/interfaces/user.interface';
 import { LocalAuthGuard } from '../passport-strategies/local.strategy';
 import { AuthService } from './auth.service';
 import { FacebookAuthGuard } from 'passport-strategies/facebook.startegy';
+import { GoogleAuthGuard } from 'passport-strategies/google.strategy';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
-  
+
+  @Get('google')
+  @UseGuards(new GoogleAuthGuard())
+  async google(
+    @Req() req: RequestWithAuth
+  ): Promise<UserDto> {  
+    return this.authService.loginUser(req);
+  }
+
   @Get('facebook')
   @UseGuards(new FacebookAuthGuard())
   async facebook(

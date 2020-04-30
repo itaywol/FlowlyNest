@@ -25,7 +25,7 @@ export interface Performer {
   performances: string[];
 }
 
-export type AuthType = AuthTypes.Local | AuthTypes.Facebook;
+export type AuthType = AuthTypes.Local | AuthTypes.Facebook | AuthTypes.Google;
 
 export declare namespace AuthTypes {
   interface Local {
@@ -36,6 +36,11 @@ export declare namespace AuthTypes {
   interface Facebook {
     authType: "facebook";
     facebook: string;
+  }
+
+  interface Google {
+    authType: "google";
+    google: string;
   }
 }
 
