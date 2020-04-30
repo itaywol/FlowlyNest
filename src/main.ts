@@ -13,22 +13,21 @@ export function isProduction(): boolean {
 
 export const session = expressSession({
   secret: process.env.SESSION_SECRET || 'henriIsTheMostEvilCatInTheWorld',
-  name: process.env.SESSION_COOKIE_NAME || 'performa_auth',
+  name: 'auth',
   store: new MongoStore({
     stringify: false,
     url: process.env.MONGO_URI,
-    collection: process.env.SESSION_MONGO_COLLECTION_NAME || 'authSessions',
   }),
-  resave: true,
+  resave: false,
   saveUninitialized: false,
   cookie: {
     maxAge: parseInt(
       process.env.SESSION_COOKIE_MAX_AGE || '30*24*24*60*60*1000',
     ),
-    httpOnly: true,
     secure: isProduction(),
-    sameSite: 'none',
     domain: process.env.PUBLIC_DOMAIN || 'localhost',
+    sameSite: 'none',
+    httpOnly: true,
   },
 });
 function initMiddlewares(app: INestApplication) {

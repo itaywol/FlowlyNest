@@ -25,13 +25,31 @@ export interface Performer {
   performances: string[];
 }
 
-export interface User {
-  _id: any;
+export type AuthType = AuthTypes.Local | AuthTypes.Facebook | AuthTypes.Google;
+
+export declare namespace AuthTypes {
+  interface Local {
+    authType: "local";
+    password?: string;
+  }
+
+  interface Facebook {
+    authType: "facebook";
+    facebook: string;
+  }
+
+  interface Google {
+    authType: "google";
+    google: string;
+  }
+}
+
+export interface UserDto {
+  _id: string;
   email: string;
+  nickName: string;
   firstName: string;
   lastName: string;
-  nickName: string;
-  phoneNumber: string;
   enabled: boolean;
   performer: Performer;
   lastSeenAt: number;
@@ -39,21 +57,15 @@ export interface User {
     currentBalance: number;
   };
 }
+
+export interface User extends UserDto {
+  _id: any;
+  auth: AuthType;
+}
+
 export interface LoginUserDTO {
   email: string;
   password: string;
-}
-
-export interface UserDto {
-  id: string;
-  email: string;
-  nickName: string;
-  phoneNumber: string;
-  firstName: string;
-  lastName: string;
-  balance: {
-    currentBalance: number;
-  };
 }
 
 export interface GetUserChannelDTO {
@@ -71,7 +83,6 @@ export interface UpdateUserDTO {
   email: string;
   firstName: string;
   lastName: string;
-  phoneNumber: string;
 }
 
 export interface RequestWithAuth extends Request {

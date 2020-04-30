@@ -64,7 +64,7 @@ export class PaymentController {
   @Post('checkout')
   async checkout(@Req() req: RequestWithAuth, @Body() data: ICreatePaymentDTO) {
     return await this.paymentProducer.createPayment({
-      purchaserId: req.user.id,
+      purchaserId: req.user._id,
       ...data,
     });
   }
