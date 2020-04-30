@@ -154,9 +154,10 @@ export class UserService {
       );
       chat.chatMessages = messages;
     } else {
-      chat.chatMessages = [];
+      chat.chatMessages = chat.chatMessages || [];
     }
 
+    console.log(chat);
     return { owner, chat } as GetUserChannelDTO;
   }
 }

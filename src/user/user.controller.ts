@@ -64,7 +64,8 @@ export class UserController {
     @Query('nickName') nickName: string,
   ): Promise<GetUserChannelDTO | null> {
     if (!nickName) throw new HttpException('Must provide nickName param', 404);
-    return await this.userService.getUserChannel(nickName);
+    const result = await this.userService.getUserChannel(nickName);
+    return result;
   }
 
   @Put()

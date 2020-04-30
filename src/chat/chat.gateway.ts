@@ -48,6 +48,7 @@ export class ChatGateway
     );
     this.logger.verbose(`${user.nickName} has connected`);
   }
+
   async handleDisconnect(@ConnectedSocket() client: Socket) {
     // Disconnect any connection if isnt a logged in user
     const user: User = await this.userService.getUserByID(
@@ -67,20 +68,28 @@ export class ChatGateway
     const user: User = await this.userService.getUserByID(
       client.handshake.session.passport.userId,
     );
+    const now: number = Date.now();
+
     this.logger.verbose(
       `${user.nickName} has sent a message to room: ${payload.room} with content: ${payload.message}`,
     );
+
     this.server.to(payload.room).emit('onMessageFromServer', {
-      sender: user.nickName,
+      sender: { user: user._id, nickName: user.nickName },
       message: payload.message,
-      createdAt: Date.now(),
+      createdAt: now,
     });
+
     this.chatProducer.addMessageToDB({
-      createdAt: Date.now(),
+      createdAt: now,
       message: payload.message,
       sender: { user: user, nickName: user.nickName },
       room: payload.room,
     });
+
+    this.logger.verbose(
+      `${user.nickName} has sent a message to room: ${payload.room} with content: ${payload.message}`,
+    );
   }
 
   @SubscribeMessage('joinRoom')
@@ -89,12 +98,11 @@ export class ChatGateway
     @MessageBody() payload: { room: string },
   ) {
     this.logger.verbose(`${client.id} had joined ${payload.room}`);
+
     client.join(payload.room);
-    const ChatChannel = await this.userService.getUserChannel(payload.room);
+
     client.emit('joinedRoom', {
       room: payload.room,
-      messages: ChatChannel.chat.chatMessages,
-      settings: ChatChannel.chat.chatSettings,
     });
   }
 
