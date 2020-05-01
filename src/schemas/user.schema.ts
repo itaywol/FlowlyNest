@@ -4,7 +4,6 @@ import * as bcrypt from 'bcrypt';
 import { User } from 'user/interfaces/user.interface';
 
 export interface UserDocument extends User, Document {
-
   checkPassword(password: string): Promise<boolean>;
 }
 export interface IUserModel extends Model<UserDocument> {
@@ -36,39 +35,34 @@ export const UserSchema = new Schema(
     lastName: { type: String, required: false },
     nickName: { type: String, required: true, unique: true },
     performer: {
-      paypal: {
-        email: { type: String },
-        phoneNumber: { type: String },
-      },
-      balance: {
-        currentBalance: { type: Number, required: true, default: 0 },
-        transactions: [{ type: Schema.Types.ObjectId, ref: 'Transactions' }],
-      },
       stream: {
-        title: { type: String, required: true, default: 'my stream' },
+        title: { type: String },
         secretKey: {
           type: String,
-          required: true,
-          default: GenerateStreamKey(48),
         },
-        live: { type: Boolean, default: false },
+        live: { type: Boolean },
         chat: {
           type: Schema.Types.ObjectId,
           ref: 'Chat',
         },
         settings: {
-          public: { type: Boolean, default: false },
-          pricing: { type: Number, default: 10 },
+          public: { type: Boolean },
+          pricing: { type: Number },
           maxViewers: {
-            enabled: { type: Boolean, default: true },
-            amount: { type: Number, default: 8 },
+            enabled: { type: Boolean },
+            amount: { type: Number },
           },
         },
       },
     },
     balance: {
-      currentBalance: { type: Number, required: true, default: 0 },
+      chargedBalance: { type: Number, required: true, default: 0 },
+      earnedBalance: { type: Number, required: true, default: 0 },
       transactions: [{ type: Schema.Types.ObjectId, ref: 'Transactions' }],
+    },
+    paypal: {
+      email: { type: String },
+      phoneNumber: { type: String },
     },
     tickets: { type: Schema.Types.ObjectId, ref: 'Performance' },
     lastSeenAt: { type: Date, default: Date.now() },
@@ -80,8 +74,8 @@ export const UserSchema = new Schema(
 UserSchema.pre<UserDocument>('save', function(next) {
   const user = this;
   const userAuth = user.auth;
-  
-  if (userAuth.authType === 'local' && user.isModified('auth.password')) {
+
+  if (userAuth.authType === 'local' && user.isModified('auth.type.password')) {
     bcrypt.genSalt(10, (genSaltError, salt) => {
       if (genSaltError) {
         return next(genSaltError);
@@ -104,17 +98,17 @@ UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function(next) {
   const updateFields = this.getUpdate();
 
   // Generate a salt and use it to hash the user's password
-  if (updateFields.auth.password) {
+  if (updateFields.auth.type.password) {
     bcrypt.genSalt(10, (genSaltError, salt) => {
       if (genSaltError) {
         return next(genSaltError);
       }
 
-      bcrypt.hash(updateFields.auth.password, salt, (err, hash) => {
+      bcrypt.hash(updateFields.auth.type.password, salt, (err, hash) => {
         if (err) {
           return next(err);
         }
-        updateFields.auth.password = hash;
+        updateFields.auth.type.password = hash;
         next();
       });
     });
@@ -129,7 +123,7 @@ UserSchema.methods.checkPassword = function(
   const user = this;
 
   return new Promise((resolve, reject) => {
-    bcrypt.compare(password, user.auth.password, (error, isMatch) => {
+    bcrypt.compare(password, user.auth.type.password, (error, isMatch) => {
       if (error) {
         reject(error);
       }
@@ -137,6 +131,13 @@ UserSchema.methods.checkPassword = function(
       resolve(isMatch);
     });
   });
+};
+UserSchema.methods.becomePerformer = async function(): Promise<UserDocument> {
+  const user: UserDocument = this;
+  user.performer.stream.secretKey = GenerateStreamKey(48);
+  user.performer.stream.title = 'My Stream';
+  user.performer.stream.settings.public = false;
+  return await user.save();
 };
 
 UserSchema.statics.validateEmail = function(email: string): boolean {

@@ -2,6 +2,11 @@ import { Request } from 'express';
 import { ChannelChatDTO, ChannelChat } from 'chat/interfaces/chat.interfaces';
 export interface StreamSettings {
   pricing: number;
+  public: boolean;
+  maxViewers: {
+    enabled: boolean;
+    amount: number;
+  };
 }
 export interface Stream {
   title: string;
@@ -16,30 +21,23 @@ export interface Paypal {
 }
 export interface Performer {
   stream: Stream;
-  paypal: Paypal;
-  balance: {
-    currentBalance: number;
-    transactions: any;
-  };
-  //TODO: switch to performances type
-  performances: string[];
 }
 
 export type AuthType = AuthTypes.Local | AuthTypes.Facebook | AuthTypes.Google;
 
 export declare namespace AuthTypes {
   interface Local {
-    authType: "local";
+    authType: 'local';
     password?: string;
   }
 
   interface Facebook {
-    authType: "facebook";
+    authType: 'facebook';
     facebook: string;
   }
 
   interface Google {
-    authType: "google";
+    authType: 'google';
     google: string;
   }
 }
@@ -54,13 +52,15 @@ export interface UserDto {
   performer: Performer;
   lastSeenAt: number;
   balance: {
-    currentBalance: number;
+    chargedBalance: number;
+    earnedBalance: number;
   };
 }
 
 export interface User extends UserDto {
   _id: any;
   auth: AuthType;
+  paypal: Paypal;
 }
 
 export interface LoginUserDTO {

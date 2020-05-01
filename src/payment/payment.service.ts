@@ -184,7 +184,7 @@ export class PaymentService {
   async withdraw(_id: string, amount: number) {
     const user: UserDocument = await this.userService.getUserByID(_id);
 
-    if (amount > user.performer.balance.currentBalance)
+    if (amount > user.balance.earnedBalance)
       throw new HttpException('Payout amount higher then holdings', 401);
 
     const dedactBalace = await this.userService.takeBalanceFromUser(
@@ -216,7 +216,7 @@ export class PaymentService {
             currency: 'USD',
             value: amount,
           },
-          receiver: user.performer.paypal.email || user.email,
+          receiver: user.paypal.email || user.email,
           // eslint-disable-next-line @typescript-eslint/camelcase
           sender_item_id: `${amount} eBalance withdrawl`,
         },
