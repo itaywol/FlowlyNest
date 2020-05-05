@@ -31,7 +31,7 @@ export class UserController {
   async registerUser(
     @Session() session: Express.Session,
     @Body() body: CreateUserDTO,
-  ): Promise<string> {
+  ): Promise<UserDto> {
     const createdUser: User = await this.userService.registerLocal(body);
 
     if (!createdUser) throw new HttpException('User Already Exists', 401);
@@ -40,7 +40,19 @@ export class UserController {
       userId: createdUser._id,
     };
 
-    return createdUser._id;
+    const toUserDto: UserDto = {
+      _id: createdUser._id,
+      balance: createdUser.balance,
+      email: createdUser.email,
+      enabled: createdUser.enabled,
+      firstName: createdUser.firstName,
+      lastName: createdUser.lastName,
+      lastSeenAt: createdUser.lastSeenAt,
+      nickName: createdUser.nickName,
+      performer: createdUser.performer
+    };
+    
+    return toUserDto;
   }
 
   @Get()
