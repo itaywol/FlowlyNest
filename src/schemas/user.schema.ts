@@ -71,11 +71,11 @@ export const UserSchema = new Schema(
   { timestamps: true },
 );
 
-UserSchema.pre<UserDocument>('save', function(next) {
+UserSchema.pre<UserDocument>('save', function (next) {
   const user = this;
   const userAuth = user.auth;
 
-  if (userAuth.authType === 'local' && user.isModified('auth.type.password')) {
+  if (userAuth.authType === 'local' && user.isModified('auth.password')) {
     bcrypt.genSalt(10, (genSaltError, salt) => {
       if (genSaltError) {
         return next(genSaltError);
@@ -94,21 +94,21 @@ UserSchema.pre<UserDocument>('save', function(next) {
   }
 });
 
-UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function(next) {
+UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function (next) {
   const updateFields = this.getUpdate();
 
   // Generate a salt and use it to hash the user's password
-  if (updateFields.auth.type.password) {
+  if (updateFields.auth && updateFields.auth.password) {
     bcrypt.genSalt(10, (genSaltError, salt) => {
       if (genSaltError) {
         return next(genSaltError);
       }
 
-      bcrypt.hash(updateFields.auth.type.password, salt, (err, hash) => {
+      bcrypt.hash(updateFields.auth.password, salt, (err, hash) => {
         if (err) {
           return next(err);
         }
-        updateFields.auth.type.password = hash;
+        updateFields.auth.password = hash;
         next();
       });
     });
@@ -117,7 +117,7 @@ UserSchema.pre<Query<UserDocument>>('findOneAndUpdate', function(next) {
   }
 });
 
-UserSchema.methods.checkPassword = function(
+UserSchema.methods.checkPassword = function (
   password: string,
 ): Promise<boolean> {
   const user = this;
@@ -132,7 +132,7 @@ UserSchema.methods.checkPassword = function(
     });
   });
 };
-UserSchema.methods.becomePerformer = async function(): Promise<UserDocument> {
+UserSchema.methods.becomePerformer = async function (): Promise<UserDocument> {
   const user: UserDocument = this;
   user.performer.stream.secretKey = GenerateStreamKey(48);
   user.performer.stream.title = 'My Stream';
@@ -140,10 +140,10 @@ UserSchema.methods.becomePerformer = async function(): Promise<UserDocument> {
   return await user.save();
 };
 
-UserSchema.statics.validateEmail = function(email: string): boolean {
+UserSchema.statics.validateEmail = function (email: string): boolean {
   return validateEmail(email);
 };
-UserSchema.statics.GenerateStreamkey = function(length: number): string {
+UserSchema.statics.GenerateStreamkey = function (length: number): string {
   return GenerateStreamKey(length);
 };
 
