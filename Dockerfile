@@ -2,6 +2,8 @@ FROM node:alpine AS development
 
 WORKDIR /usr/src/app
 
+RUN apk update && apk add --no-cache gcompat
+
 COPY package*.json ./
 
 RUN npm install 
