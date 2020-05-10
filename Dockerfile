@@ -2,6 +2,8 @@ FROM node:alpine AS development
 
 WORKDIR /usr/src/app
 
+RUN apk add libc6-compat
+
 COPY package*.json ./
 
 RUN npm install 
