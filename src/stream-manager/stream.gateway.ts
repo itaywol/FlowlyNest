@@ -15,8 +15,8 @@ import sharedsession = require('express-socket.io-session');
 import { session } from 'main';
 import { UserService } from 'user/user.service';
 import { User } from 'user/interfaces/user.interface';
-import * as webrtc from 'wrtc';
-console.log(webrtc.RTCPeerConnection);
+import { RTCPeerConnection } from 'wrtc';
+
 interface WebRTCStream {
     rtc: RTCPeerConnection;
     socketId: string;
@@ -48,8 +48,13 @@ export class StreamGateway
         }
 
         const user: User = await this.userService.getUserByID(userId);
-
+        try{
+            new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })
+        } catch (e) {
+            this.logger.error(e);
+        }
         const rtc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+        this.logger.error(rtc);
         rtc.onicecandidate = (e) => this.onIceCandidate(e, client);
         rtc.onconnectionstatechange = () => this.logger.error(rtc.connectionState);
 
