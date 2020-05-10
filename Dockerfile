@@ -2,7 +2,7 @@ FROM node:alpine AS development
 
 WORKDIR /usr/src/app
 
-RUN apk add libc6-compat
+RUN apk update && apk add --no-cache gcompat
 
 COPY package*.json ./
 
