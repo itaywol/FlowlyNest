@@ -1,8 +1,8 @@
-FROM node:alpine AS development
+FROM node:latest AS development
 
 WORKDIR /usr/src/app
 
-RUN apk update && apk add --no-cache gcompat
+#RUN apt update && apt install --no-cache git curl musl cmake gcc gcompat
 
 COPY package*.json ./
 
@@ -12,7 +12,7 @@ COPY . .
 
 RUN npm run build
 
-FROM node:alpine AS production
+FROM node:latest AS production
 
 ARG NODE_ENV=production
 ENV NODE_ENV=${NODE_ENV}
