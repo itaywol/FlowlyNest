@@ -1,5 +1,6 @@
 import { User } from 'user/interfaces/user.interface';
 import { StreamChat } from 'chat/interfaces/chat.interfaces';
+import { Ticket } from 'tickets/interface/ticket.interface';
 
 declare namespace CrowdControlType {
   interface freeForAll {
@@ -17,27 +18,36 @@ export type CCTypes = CrowdControlType.list | CrowdControlType.freeForAll;
 
 declare namespace TicketsType {
   interface oneTime {
+    plan: 'OneTime';
     price: number;
   }
 
-  interface plan {
+  interface intervalPlan {
+    plan: 'Interval';
     price: number;
     interval: number;
   }
+  interface entryPlan {
+    plan: 'Entries';
+    price: number;
+    amount: number;
+  }
 
   interface unlimited {
+    plan: 'Unlimited';
     price: number;
   }
 }
 
 export type TicketingTypes =
   | TicketsType.oneTime
-  | TicketsType.plan
+  | TicketsType.intervalPlan
+  | TicketsType.entryPlan
   | TicketsType.unlimited;
 
 export interface StreamSettings {
   crowdControl: CCTypes;
-  ticketing: TicketingTypes;
+  ticketing: TicketingTypes[];
   title: string;
   isPublic: boolean;
 }
@@ -47,6 +57,7 @@ export interface Stream extends StreamSettings {
   startTime: number;
   endTime: number;
   streamChat: StreamChat;
+  ticketsBought: Ticket[] | null;
 }
 
 export interface UserStreams {
@@ -55,4 +66,5 @@ export interface UserStreams {
   futureStreams: Stream[] | null;
   pastStreams: Stream[] | null;
   defaultStreamSettings: StreamSettings;
+  streamVisits: number;
 }

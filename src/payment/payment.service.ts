@@ -184,7 +184,7 @@ export class PaymentService {
   async withdraw(_id: string, amount: number) {
     const user: UserDocument = await this.userService.getUserByID(_id);
 
-    if (amount > user.balance.earnedBalance)
+    if (amount > user.wallet.earnedBalance)
       throw new HttpException('Payout amount higher then holdings', 401);
 
     const dedactBalace = await this.userService.takeBalanceFromUser(
@@ -231,5 +231,22 @@ export class PaymentService {
     if (!createPayout) throw new HttpException('Payout failed', 500);
 
     console.log('Success');
+  }
+
+  async requestWithdraw(userId: string, amount: number) {
+    const user: UserDocument = await this.userService.getUserByID(userId);
+
+    user.wallet.payouts.requests.push({
+      amount: amount,
+      submittedAt: Date.now(),
+    });
+
+    try {
+      await user.save();
+    } catch (Error) {
+      throw new HttpException('Payout Request Failed', 500);
+    }
+
+    return true;
   }
 }

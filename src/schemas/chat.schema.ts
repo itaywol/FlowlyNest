@@ -1,7 +1,7 @@
 import { Schema, Document } from 'mongoose';
-import { ChannelChat } from 'chat/interfaces/chat.interfaces';
+import { StreamChat } from 'chat/interfaces/chat.interfaces';
 
-export interface ChatDocument extends ChannelChat, Document {}
+export interface ChatDocument extends StreamChat, Document {}
 
 export const ChatSchema = new Schema(
   {

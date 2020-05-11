@@ -37,19 +37,26 @@ export const defaultStreamSettings = {
     },
     required: true,
   },
-  ticketing: {
-    type: {
-      oneTime: { price: { type: Number, default: 5 } },
-      plan: {
-        interval: { type: Number, default: 1000 * 60 * 60 * 24 },
-        price: { type: Number, default: 10 },
+  ticketsBought: [{ type: Schema.Types.ObjectId, ref: 'Tickets' }],
+  ticketing: [
+    {
+      type: {
+        oneTime: { price: { type: Number, default: 5 } },
+        intervalPlan: {
+          interval: { type: Number, default: 1000 * 60 * 60 * 24 },
+          price: { type: Number, default: 10 },
+        },
+        entryPlan: {
+          amount: { type: Number, default: 2 },
+          price: { type: Number, default: 10 },
+        },
+        unlimited: {
+          price: { type: Number, default: 50 },
+        },
       },
-      unlimited: {
-        price: { type: Number, default: 50 },
-      },
+      required: true,
     },
-    required: true,
-  },
+  ],
 };
 
 export const UserSchema = new Schema(
@@ -80,6 +87,7 @@ export const UserSchema = new Schema(
       },
       pastStreams: [{ type: Schema.Types.ObjectId, ref: 'Streams' }],
       defaultStreamSettings: defaultStreamSettings,
+      streamVisits: { type: Number, default: 0 },
     },
     wallet: {
       chargedBalance: { type: Number, required: true, default: 0 },

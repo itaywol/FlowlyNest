@@ -42,16 +42,16 @@ export class UserController {
 
     const toUserDto: UserDto = {
       _id: createdUser._id,
-      balance: createdUser.balance,
+      wallet: createdUser.wallet,
       email: createdUser.email,
       enabled: createdUser.enabled,
       firstName: createdUser.firstName,
       lastName: createdUser.lastName,
       lastSeenAt: createdUser.lastSeenAt,
       nickName: createdUser.nickName,
-      performer: createdUser.performer
+      streams: createdUser.streams,
     };
-    
+
     return toUserDto;
   }
 

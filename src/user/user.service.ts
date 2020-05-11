@@ -1,29 +1,24 @@
-import { Injectable, HttpException, forwardRef, Inject } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { StreamChatDTO } from 'chat/interfaces/chat.interfaces';
 import { Model } from 'mongoose';
-import { UserDocument } from 'schemas/user.schema';
 import { Profile as FacebookProfile } from 'passport-facebook-token';
 import { Profile as GoogleProfile } from 'passport-google-oauth20';
+import { UserDocument } from 'schemas/user.schema';
 import {
-  UserDto,
   AuthType,
-  User,
-  LoginUserDTO,
   AuthTypes,
-  UpdateUserDTO,
   CreateUserDTO,
   GetUserChannelDTO,
+  LoginUserDTO,
+  UpdateUserDTO,
+  User,
+  UserDto,
 } from './interfaces/user.interface';
-import { ChatDocument } from 'schemas/chat.schema';
-import { ChannelChatDTO } from 'chat/interfaces/chat.interfaces';
-import { ChatService } from 'chat/chat.service';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @InjectModel('User') private userModel: Model<UserDocument>,
-    @Inject(forwardRef(() => ChatService)) private chatService: ChatService,
-  ) {}
+  constructor(@InjectModel('User') private userModel: Model<UserDocument>) {}
   public async findOrCreateGoogle(
     profile: GoogleProfile,
   ): Promise<UserDto | null> {
@@ -121,9 +116,7 @@ export class UserService {
     });
 
     let user: UserDocument | undefined;
-    let chat: ChatDocument = await this.chatService.createChat();
     try {
-      createdUser.performer.stream.chat = chat;
       user = await createdUser.save();
     } catch (error) {
       console.error(error.message);
@@ -220,10 +213,11 @@ export class UserService {
     return user;
   }
 
-  public async getUserEntryFee(userId: string): Promise<number> {
-    const user: UserDocument = await this.userModel.findById(userId);
-    return user.performer.stream.settings.pricing;
-  }
+  // TODO: Move to ticket controller or service and ref from here
+  //public async getUserEntryFee(userId: string): Promise<TicketDTO> {
+  //const user: UserDocument = await this.userModel.findById(userId);
+  //return user.streams.activeStream.ticketing.price;
+  //}
 
   public async getUserByNickname(nickName: string): Promise<UserDocument> {
     const user: UserDocument = await this.userModel
@@ -233,13 +227,15 @@ export class UserService {
     return user;
   }
 
+  // TODO: check if has activeStream
   public async getUserChannel(
     nickName: string,
   ): Promise<GetUserChannelDTO | null> {
     console.log('here');
     const user: UserDocument = await this.getUserByNickname(nickName);
     const owner: UserDto = user as UserDto;
-    const chat: ChannelChatDTO = user.performer.stream.chat as ChannelChatDTO;
+    const chat: StreamChatDTO = user.streams.activeStream.streamChat
+      ._id as StreamChatDTO;
     if (chat?.chatMessages && chat?.chatMessages.length > 200) {
       const messages = chat?.chatMessages.slice(
         chat.chatMessages.length - 200,

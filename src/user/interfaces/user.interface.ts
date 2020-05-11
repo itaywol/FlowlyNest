@@ -2,6 +2,7 @@ import { Request } from 'express';
 import { Transaction } from 'braintree';
 import { StreamChatDTO } from 'chat/interfaces/chat.interfaces';
 import { UserStreams } from 'stream-manager/interfaces/stream.interface';
+import { Ticket } from 'tickets/interface/ticket.interface';
 
 export type AuthType = AuthTypes.Local | AuthTypes.Facebook | AuthTypes.Google;
 
@@ -58,13 +59,13 @@ export interface UserDto {
   enabled: boolean;
   lastSeenAt: number;
   wallet: Wallet;
+  streams: UserStreams;
 }
 
 export interface User extends UserDto {
   _id: any;
   auth: AuthType;
   secretStreamKey: string;
-  streams: UserStreams;
 }
 
 export interface LoginUserDTO {

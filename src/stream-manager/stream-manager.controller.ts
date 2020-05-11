@@ -26,6 +26,13 @@ export interface RTMPData {
   name: string;
 }
 
+/*
+ * TODO: if streaming and has planned instance then make that instance and it settings the activeStream
+ * TODO: if no planned instance then create instance out of a default settings
+ * TODO: on stream done move activeInstance to pastStreams array
+ * TODO: AFTER_MVP: support multiple streams per user (for tv providers... etc...) stream key per instance
+ */
+
 @Controller('stream')
 export class StreamManagerController {
   constructor(

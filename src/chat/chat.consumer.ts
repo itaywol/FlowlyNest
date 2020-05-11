@@ -24,7 +24,7 @@ export class ChatConsumer {
     );
 
     // get the chat id
-    const chatId: string = userChat.performer.stream.chat._id;
+    const chatId: string = userChat.streams.activeStream.streamChat._id;
 
     // Exctract message sender data
     const sender: UserDocument = await this.userService.getUserByNickname(

@@ -76,4 +76,16 @@ export class PaymentController {
       body.amount,
     );
   }
+
+  @Post('requestPayout')
+  async requestWithdraw(
+    @Req() req: RequestWithAuth,
+    @Body() body: { amount: number },
+  ) {
+    if (!req.session.passport) throw new HttpException('Unauthorized', 401);
+    return await this.paymentService.requestWithdraw(
+      req.session.passport.userId,
+      body.amount,
+    );
+  }
 }

@@ -14,7 +14,7 @@ export class UserDeserializerMiddleware implements NestMiddleware {
         );
 
         if (userDocument === null) {
-          req.session.destroy(err => {
+          req.session.destroy((err) => {
             if (!err) {
               throw err;
             }
@@ -28,13 +28,13 @@ export class UserDeserializerMiddleware implements NestMiddleware {
             lastName: userDocument.lastName,
             lastSeenAt: userDocument.lastSeenAt,
             nickName: userDocument.nickName,
-            performer: userDocument.performer,
-            balance: userDocument.balance,
+            streams: userDocument.streams,
+            wallet: userDocument.wallet,
           };
         }
       } catch (err) {
         if (err instanceof NotFoundException) {
-          req.session.destroy(err => {
+          req.session.destroy((err) => {
             if (err !== undefined) {
               throw err;
             }
