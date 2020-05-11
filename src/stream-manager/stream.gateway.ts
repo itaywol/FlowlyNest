@@ -1,12 +1,12 @@
 import {
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-  ConnectedSocket,
-  MessageBody,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
+    SubscribeMessage,
+    WebSocketGateway,
+    WebSocketServer,
+    ConnectedSocket,
+    MessageBody,
+    OnGatewayConnection,
+    OnGatewayDisconnect,
+    OnGatewayInit,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { Logger } from 'winston';
@@ -15,88 +15,110 @@ import sharedsession = require('express-socket.io-session');
 import { session } from 'main';
 import { UserService } from 'user/user.service';
 import { User } from 'user/interfaces/user.interface';
-import { RTCPeerConnection } from 'wrtc';
+import { RTCPeerConnection as wRtcPeerConnection, MediaStream as wMediaStream } from 'wrtc';
 
 interface WebRTCStream {
-  rtc: RTCPeerConnection;
-  socketId: string;
+    rtc: RTCPeerConnection;
+    socketId: string;
+    mediaStream: MediaStream;
 }
 
 @WebSocketGateway(parseInt(process.env.BACK_WS_PORT || '3001'), {
-  namespace: 'stream',
-  path: '/sock',
+    namespace: 'stream',
+    path: '/sock',
 })
 export class StreamGateway
-  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
-  private activeStreams: Map<string, WebRTCStream> = new Map<
-    string,
-    WebRTCStream
-  >();
-  constructor(
-    @Inject('winston') private logger: Logger,
-    private userService: UserService,
-  ) {}
+    implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+    private activeStreams: Map<string, WebRTCStream> = new Map<string, WebRTCStream>();
+    constructor(
+        @Inject('winston') private logger: Logger,
+        private userService: UserService) { }
 
-  @WebSocketServer() server: Server;
-  afterInit(server: Server) {
-    server.use(sharedsession(session, { autoSave: true }));
-  }
-
-  async handleConnection(@ConnectedSocket() client: Socket) {
-    const userId = client.handshake.session.passport.userId;
-
-    // Disconnect any connection if isnt a logged in user or currently streaming
-    //if (!client.handshake.session.passport || this.activeStreams.get(userId) !== undefined) {
-    //client.disconnect();
-    //return;
-    //}
-
-    const user: User = await this.userService.getUserByID(userId);
-    try {
-      new RTCPeerConnection({
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-      });
-    } catch (e) {
-      this.logger.error(e);
-    }
-    const rtc = new RTCPeerConnection({
-      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-    });
-    this.logger.error(rtc);
-    rtc.onicecandidate = (e) => this.onIceCandidate(e, client);
-    rtc.onconnectionstatechange = () => this.logger.error(rtc.connectionState);
-
-    this.activeStreams.set(userId, { rtc, socketId: client.id });
-
-    this.logger.verbose(`${user.nickName} Started streaming WebRTC negotiate`);
-
-    client.emit('offer', 'test12343');
-  }
-
-  onIceCandidate(e: RTCPeerConnectionIceEvent, client: Socket) {
-    client.emit('candidate', e.candidate);
-  }
-
-  async handleDisconnect(@ConnectedSocket() client: Socket) {
-    // Disconnect any connection if isnt a logged in user
-    const user: User = await this.userService.getUserByID(
-      client.handshake.session.passport.userId,
-    );
-
-    if (!client.handshake.session.passport) {
-      client.disconnect();
+    @WebSocketServer() server: Server;
+    afterInit(server: Server) {
+        server.use(sharedsession(session, { autoSave: true }));
     }
 
-    this.logger.verbose(`${user.nickName} has disconnected from streaming`);
-  }
+    async handleConnection(@ConnectedSocket() client: Socket) {
+        const userId: string = "" + client.handshake.session.passport.userId;
 
-  @SubscribeMessage('leaveRoom')
-  async handleLeaveRoomRequest(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() room: string,
-  ) {
-    this.logger.verbose(`${client.id} had left ${room}`);
-    client.leave(room);
-    client.emit('leftRoom', room);
-  }
+        // Disconnect any connection if isnt a logged in user or currently streaming
+        if (!client.handshake.session.passport || this.activeStreams.get(userId) !== undefined) {
+            client.disconnect();
+            return;
+        }
+
+        const user: User = await this.userService.getUserByID(userId);
+        const rtc = (new wRtcPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] })) as RTCPeerConnection;
+
+        this.activeStreams.set(userId, { rtc, socketId: client.id, mediaStream: new wMediaStream() });
+
+        rtc.onicecandidate = (e) => { if (e.candidate !== null) client.emit("candidate", e.candidate); };
+        rtc.onconnectionstatechange = () => this.onRtcConnectionStateChanged(rtc, user);
+        rtc.ontrack = (e) => this.onTrackAdded(e.track, user);
+
+        this.logger.verbose(`${user.nickName} Started WebRTC negotiate`);
+
+        client.on("offer", async (data: RTCSessionDescriptionInit) => this.onOfferReceived(rtc, client, data))
+        client.on("candidate", (data: RTCIceCandidate) => rtc.addIceCandidate(data))
+    }
+
+    onTrackAdded(track: MediaStreamTrack, user: User) {
+        const activeStream = this.activeStreams.get("" + user._id);
+
+        if (activeStream === undefined) {
+            this.logger.error("Track added on non existing stream");
+        } else {
+            activeStream.mediaStream.addTrack(track);
+
+            this.activeStreams.set(user._id, activeStream);
+
+            this.logger.verbose(`Added track for ${user.nickName} stream.`);
+        }
+    }
+
+    onOfferReceived = async (rtc: RTCPeerConnection, client: Socket, data: RTCSessionDescriptionInit) => {
+        try {
+            await rtc.setRemoteDescription(data);
+            const answer = await rtc.createAnswer({ offerToReceiveAudio: true, offerToReceiveVideo: true });
+            await rtc.setLocalDescription(answer);
+            client.emit("answer", answer);
+        } catch (e) {
+            console.error(e);
+            console.error("error creating answer");
+        }
+    }
+
+    onRtcConnectionStateChanged(rtc: RTCPeerConnection, user: User) {
+        switch (rtc.connectionState) {
+            case "connected":
+                this.logger.verbose(`${user.nickName} Started streaming`);
+                break;
+        }
+    }
+
+    async handleDisconnect(@ConnectedSocket() client: Socket) {
+        const userId = "" + client.handshake.session.passport.userId;
+        // Disconnect any connection if isnt a logged in user
+        const user: User = await this.userService.getUserByID(userId);
+
+        const activeStream = this.activeStreams.get(userId);
+
+        if (activeStream !== undefined && activeStream.socketId === client.id) {
+            activeStream.rtc.close();
+            this.activeStreams.set(userId, undefined);
+        }
+
+        this.logger.verbose(`${user.nickName} has stopped WebRTC negotiate`);
+    }
+
+    @SubscribeMessage('leaveRoom')
+    async handleLeaveRoomRequest(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() room: string,
+    ) {
+        this.logger.verbose(`${client.id} had left ${room}`);
+        client.leave(room);
+        client.emit('leftRoom', room);
+    }
 }
