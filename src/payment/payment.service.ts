@@ -216,7 +216,10 @@ export class PaymentService {
             currency: 'USD',
             value: amount,
           },
-          receiver: user.paypal.email || user.email,
+          receiver:
+            user.wallet.payouts.method.email ||
+            user.wallet.payouts.method.phoneNumber ||
+            user.email,
           // eslint-disable-next-line @typescript-eslint/camelcase
           sender_item_id: `${amount} eBalance withdrawl`,
         },

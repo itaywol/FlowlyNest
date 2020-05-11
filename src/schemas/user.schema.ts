@@ -20,6 +20,38 @@ function validateEmail(email: string) {
   return expression.test(email);
 }
 
+export const defaultStreamSettings = {
+  isActiveStreamer: { type: Boolean, require: true, default: false },
+  title: { type: String, required: true },
+  isPublic: { type: Boolean, default: true },
+  crowdControl: {
+    type: {
+      freeForAll: {
+        ticketPrice: { type: Number, default: 5 },
+        limitViewers: { type: Number, default: 0 },
+      },
+      list: {
+        whiteList: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+        blackList: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+      },
+    },
+    required: true,
+  },
+  ticketing: {
+    type: {
+      oneTime: { price: { type: Number, default: 5 } },
+      plan: {
+        interval: { type: Number, default: 1000 * 60 * 60 * 24 },
+        price: { type: Number, default: 10 },
+      },
+      unlimited: {
+        price: { type: Number, default: 50 },
+      },
+    },
+    required: true,
+  },
+};
+
 export const UserSchema = new Schema(
   {
     auth: {
@@ -34,37 +66,38 @@ export const UserSchema = new Schema(
     firstName: { type: String, required: false },
     lastName: { type: String, required: false },
     nickName: { type: String, required: true, unique: true },
-    performer: {
-      stream: {
-        title: { type: String },
-        secretKey: {
-          type: String,
-        },
-        live: { type: Boolean },
-        chat: {
-          type: Schema.Types.ObjectId,
-          ref: 'Chat',
-        },
-        settings: {
-          public: { type: Boolean },
-          pricing: { type: Number },
-          maxViewers: {
-            enabled: { type: Boolean },
-            amount: { type: Number },
-          },
-        },
+    secretStreamKey: { type: String },
+    streams: {
+      activeStream: {
+        type: Schema.Types.ObjectId,
+        ref: 'Streams',
+        default: null,
       },
+      futureStreams: {
+        type: Schema.Types.ObjectId,
+        ref: 'Streams',
+        default: null,
+      },
+      pastStreams: [{ type: Schema.Types.ObjectId, ref: 'Streams' }],
+      defaultStreamSettings: defaultStreamSettings,
     },
-    balance: {
+    wallet: {
       chargedBalance: { type: Number, required: true, default: 0 },
       earnedBalance: { type: Number, required: true, default: 0 },
       transactions: [{ type: Schema.Types.ObjectId, ref: 'Transactions' }],
+      ownedTickets: [{ type: Schema.Types.ObjectId, ref: 'Tickets' }],
+      payouts: {
+        method: {
+          type: {
+            paypal: { email: { type: String }, phoneNumber: { type: String } },
+          },
+          required: true,
+        },
+        requests: [
+          { submittedAt: { type: Date, default: Date.now() }, amount: Number },
+        ],
+      },
     },
-    paypal: {
-      email: { type: String },
-      phoneNumber: { type: String },
-    },
-    tickets: { type: Schema.Types.ObjectId, ref: 'Performance' },
     lastSeenAt: { type: Date, default: Date.now() },
     enabled: { type: Boolean, default: false },
   },
@@ -132,11 +165,10 @@ UserSchema.methods.checkPassword = function (
     });
   });
 };
-UserSchema.methods.becomePerformer = async function (): Promise<UserDocument> {
+
+UserSchema.methods.becomeStreamer = async function (): Promise<UserDocument> {
   const user: UserDocument = this;
-  user.performer.stream.secretKey = GenerateStreamKey(48);
-  user.performer.stream.title = 'My Stream';
-  user.performer.stream.settings.public = false;
+  user.streams.isActiveStreamer = true;
   return await user.save();
 };
 

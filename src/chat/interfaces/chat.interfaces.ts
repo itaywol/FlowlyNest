@@ -14,7 +14,7 @@ export interface ChatSettings {
   censorOffensiveWords: boolean;
 }
 
-export interface ChannelChat {
+export interface StreamChat {
   _id: any;
   chatMessages: ChatMessage[];
   chatSettings: ChatSettings;
@@ -30,7 +30,7 @@ export interface ReceiveChatMessageDTO extends ChatMessageDTO {
   room: string;
 }
 
-export interface ChannelChatDTO {
+export interface StreamChatDTO {
   _id: string;
   chatMessages: ChatMessageDTO[];
   chatSettings: ChatSettings;

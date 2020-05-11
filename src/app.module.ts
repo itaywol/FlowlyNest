@@ -16,6 +16,7 @@ import { PassportModule } from '@nestjs/passport';
 import { UserDeserializerMiddleware } from 'middlewares/user-deserializer.middleware';
 import { ChatModule } from './chat/chat.module';
 import { PaymentModule } from './payment/payment.module';
+import { TicketsModule } from './tickets/tickets.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { PaymentModule } from './payment/payment.module';
     ChatModule,
     PaymentModule,
     PassportModule,
+    TicketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

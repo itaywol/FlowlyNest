@@ -1,27 +1,7 @@
 import { Request } from 'express';
-import { ChannelChatDTO, ChannelChat } from 'chat/interfaces/chat.interfaces';
-export interface StreamSettings {
-  pricing: number;
-  public: boolean;
-  maxViewers: {
-    enabled: boolean;
-    amount: number;
-  };
-}
-export interface Stream {
-  title: string;
-  secretKey: string;
-  chat: ChannelChat;
-  live: boolean;
-  settings: StreamSettings;
-}
-export interface Paypal {
-  email: string;
-  phoneNumber: string;
-}
-export interface Performer {
-  stream: Stream;
-}
+import { Transaction } from 'braintree';
+import { StreamChatDTO } from 'chat/interfaces/chat.interfaces';
+import { UserStreams } from 'stream-manager/interfaces/stream.interface';
 
 export type AuthType = AuthTypes.Local | AuthTypes.Facebook | AuthTypes.Google;
 
@@ -42,6 +22,33 @@ export declare namespace AuthTypes {
   }
 }
 
+export declare namespace payoutMethods {
+  interface Paypal {
+    email: string | null;
+    phoneNumber: string | null;
+  }
+}
+
+export type payoutMethodsType = payoutMethods.Paypal;
+
+export interface PayoutRequest {
+  submittedAt: number;
+  amount: number;
+}
+
+export interface Payouts {
+  method: payoutMethodsType;
+  requests: PayoutRequest[] | null;
+}
+
+export interface Wallet {
+  chargedBalance: number;
+  earnedBalance: number;
+  transactions: Transaction[] | null;
+  ownedTickets: Ticket[] | null;
+  payouts: Payouts;
+}
+
 export interface UserDto {
   _id: string;
   email: string;
@@ -49,18 +56,15 @@ export interface UserDto {
   firstName: string;
   lastName: string;
   enabled: boolean;
-  performer: Performer;
   lastSeenAt: number;
-  balance: {
-    chargedBalance: number;
-    earnedBalance: number;
-  };
+  wallet: Wallet;
 }
 
 export interface User extends UserDto {
   _id: any;
   auth: AuthType;
-  paypal: Paypal;
+  secretStreamKey: string;
+  streams: UserStreams;
 }
 
 export interface LoginUserDTO {
@@ -70,7 +74,7 @@ export interface LoginUserDTO {
 
 export interface GetUserChannelDTO {
   owner: UserDto;
-  chat: ChannelChatDTO;
+  chat: StreamChatDTO;
 }
 
 export interface CreateUserDTO {

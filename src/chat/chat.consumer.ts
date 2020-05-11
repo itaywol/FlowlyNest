@@ -18,14 +18,12 @@ export class ChatConsumer {
 
   @Process()
   async handleChatMessage(job: Job<ReceiveChatMessageDTO>) {
-    console.log('subscriber');
     // Extract the owner of the chat by the room name
     const userChat: UserDocument = await this.userService.getUserByNickname(
       job.data.room,
     );
 
     // get the chat id
-    console.log('here2');
     const chatId: string = userChat.performer.stream.chat._id;
 
     // Exctract message sender data
