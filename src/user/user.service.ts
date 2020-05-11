@@ -187,19 +187,40 @@ export class UserService {
     return updateUser;
   }
 
+/*
+ * DEPRECATED
+ */
   async takeBalanceFromUser(_id: string, amount: number): Promise<User> {
     const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
       _id,
-      { $inc: { 'balance.chargedBalance': -amount } },
+      { $inc: { 'wallet.chargedBalance': -amount } },
       { new: true },
     );
 
     return updateUser;
   }
+/*
+ * DEPRECATED
+ */
   async addBalanceToUser(_id: string, amount: number): Promise<User> {
     const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
       _id,
-      { $inc: { 'balance.chargedBalance': amount } },
+      { $inc: { 'wallet.chargedBalance': amount } },
+      { new: true },
+    );
+
+    return updateUser;
+  }
+
+  async changeUserBalance(
+    _id: string,
+    amount: number,
+    field: 'charged' | 'earned',
+  ) {
+    const path = `wallet.${field}Balance`;
+    const updateUser: UserDocument = await this.userModel.findByIdAndUpdate(
+      _id,
+      { $inc: { `${path}`: amount } },
       { new: true },
     );
 
