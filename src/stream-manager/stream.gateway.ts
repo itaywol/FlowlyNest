@@ -15,12 +15,33 @@ import sharedsession = require('express-socket.io-session');
 import { session } from 'main';
 import { UserService } from 'user/user.service';
 import { User } from 'user/interfaces/user.interface';
-import { RTCPeerConnection as wRtcPeerConnection, MediaStream as wMediaStream } from 'wrtc';
+import { RTCPeerConnection as wRtcPeerConnection, MediaStream as wMediaStream, nonstandard } from 'wrtc';
+import { StreamInput } from 'fluent-ffmpeg-multistream';
+import { PassThrough } from 'stream';
+import * as ffmpeg from 'fluent-ffmpeg';
+import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
 
 interface WebRTCStream {
     rtc: RTCPeerConnection;
     socketId: string;
     mediaStream: MediaStream;
+}
+
+interface AudioVideoSinks {
+    video: nonstandard.RTCVideoSink;
+    audio: nonstandard.RTCAudioSink
+}
+
+interface AudioVideoPassThroughs {
+    video: PassThrough;
+    audio: PassThrough
+}
+
+interface FfmpegStream {
+    sinks: AudioVideoSinks;
+    pass: AudioVideoPassThroughs;
+    output: string;
+    firstTime: boolean;
 }
 
 @WebSocketGateway(parseInt(process.env.BACK_WS_PORT || '3001'), {
@@ -38,6 +59,41 @@ export class StreamGateway
     afterInit(server: Server) {
         server.use(sharedsession(session, { autoSave: true }));
     }
+
+    onFrame = ({ frame: { width, height, data } }, stream: FfmpegStream) => {
+        this.logger.verbose("frame");
+        const VIDEO_OUTPUT_SIZE = '1920x1080'
+
+        if (stream.firstTime) {
+            this.logger.verbose("init");
+            stream.firstTime = false;
+
+            stream.sinks.audio.addEventListener('data', ({ samples: { buffer } }) => stream.pass.audio.push(Buffer.from(buffer)));
+
+            console.log(ffmpegPath);
+            ffmpeg.setFfmpegPath(ffmpegPath);
+            const proc = ffmpeg()
+                .addInput((new StreamInput(stream.pass.video)).url)
+                .addInputOptions([
+                    '-f', 'rawvideo',
+                    '-pix_fmt', 'yuv420p',
+                    '-s', width + 'x' + height,
+                    '-r', '30',
+                ])
+                .addInput((new StreamInput(stream.pass.audio)).url)
+                .addInputOptions([
+                    '-f s16le',
+                    '-ar 48k',
+                    '-ac 1',
+                ])
+                .size(VIDEO_OUTPUT_SIZE)
+                .output(stream.output);
+
+            proc.run();
+        }
+        
+        stream.pass.video.push(Buffer.from(data));
+    };
 
     async handleConnection(@ConnectedSocket() client: Socket) {
         const userId: string = "" + client.handshake.session.passport.userId;
@@ -73,7 +129,28 @@ export class StreamGateway
 
             this.activeStreams.set(user._id, activeStream);
 
-            this.logger.verbose(`Added track for ${user.nickName} stream.`);
+            this.logger.verbose(`Added ${track.kind} track for ${user.nickName} stream.`);
+
+            const audioTracks = activeStream.mediaStream.getAudioTracks();
+            const videoTracks = activeStream.mediaStream.getVideoTracks();
+
+            if (audioTracks.length === 1 && videoTracks.length === 1) {
+                const videoSink = new nonstandard.RTCVideoSink(videoTracks[0]);
+                const audioSink = new nonstandard.RTCAudioSink(audioTracks[0]);
+                const stream: FfmpegStream = {
+                    sinks: {
+                        video: videoSink,
+                        audio: audioSink
+                    },
+                    output: `rtmp://localhost:1935/perform/${user.performer.stream.secretKey}`,
+                    pass: {
+                        audio: new PassThrough(),
+                        video: new PassThrough()
+                    },
+                    firstTime: true
+                }
+                stream.sinks.video.addEventListener('frame', (a) => this.onFrame(a, stream));
+            }
         }
     }
 
@@ -93,6 +170,10 @@ export class StreamGateway
         switch (rtc.connectionState) {
             case "connected":
                 this.logger.verbose(`${user.nickName} Started streaming`);
+                break;
+            case "disconnected":
+            case "closed":
+            case "failed":
                 break;
         }
     }
