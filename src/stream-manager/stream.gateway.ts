@@ -16,9 +16,9 @@ import { session } from 'main';
 import { UserService } from 'user/user.service';
 import { User } from 'user/interfaces/user.interface';
 import { RTCPeerConnection as wRtcPeerConnection, MediaStream as wMediaStream, nonstandard } from 'wrtc';
-import { StreamInput } from 'fluent-ffmpeg-multistream';
 import { PassThrough } from 'stream';
 import * as ffmpeg from 'fluent-ffmpeg';
+import { StreamInput } from 'fluent-ffmpeg-multistream';
 import { path as ffmpegPath } from '@ffmpeg-installer/ffmpeg';
 
 interface WebRTCStream {
@@ -61,35 +61,38 @@ export class StreamGateway
     }
 
     onFrame = ({ frame: { width, height, data } }, stream: FfmpegStream) => {
-        this.logger.verbose("frame");
         const VIDEO_OUTPUT_SIZE = '1920x1080'
-
         if (stream.firstTime) {
-            this.logger.verbose("init");
-            stream.firstTime = false;
+            try {
+                stream.firstTime = false;
 
-            stream.sinks.audio.addEventListener('data', ({ samples: { buffer } }) => stream.pass.audio.push(Buffer.from(buffer)));
+                stream.sinks.audio.addEventListener('data', ({ samples: { buffer } }) => stream.pass.audio.push(Buffer.from(buffer)));
+    
+                ffmpeg.setFfmpegPath(ffmpegPath);
+                const proc = ffmpeg(stream.pass.video)
+                    .addInputOptions([
+                        '-f', 'rawvideo',
+                        '-s', width + 'x' + height,
+                    ])
+                    .fps(24)
+                    .toFormat('flv')
+                    .videoCodec('libx264')
+                    .audioCodec('aac')
+                    .addInput((new StreamInput(stream.pass.audio)).url)
+                    .addInputOptions([
+                        '-f s16le',
+                        '-ar 48k',
+                        '-ac 1',
+                    ])
+                    .size(VIDEO_OUTPUT_SIZE)
+                    .output(stream.output);
+    
+                proc.run();
+            } catch (e) {
+                stream.firstTime = true;
+                this.logger.error(e);
+            }
 
-            console.log(ffmpegPath);
-            ffmpeg.setFfmpegPath(ffmpegPath);
-            const proc = ffmpeg()
-                .addInput((new StreamInput(stream.pass.video)).url)
-                .addInputOptions([
-                    '-f', 'rawvideo',
-                    '-pix_fmt', 'yuv420p',
-                    '-s', width + 'x' + height,
-                    '-r', '30',
-                ])
-                .addInput((new StreamInput(stream.pass.audio)).url)
-                .addInputOptions([
-                    '-f s16le',
-                    '-ar 48k',
-                    '-ac 1',
-                ])
-                .size(VIDEO_OUTPUT_SIZE)
-                .output(stream.output);
-
-            proc.run();
         }
         
         stream.pass.video.push(Buffer.from(data));
@@ -142,7 +145,7 @@ export class StreamGateway
                         video: videoSink,
                         audio: audioSink
                     },
-                    output: `rtmp://localhost:1935/perform/${user.performer.stream.secretKey}`,
+                    output: `rtmp://nginx:1935/perform/${user.performer.stream.secretKey}`,
                     pass: {
                         audio: new PassThrough(),
                         video: new PassThrough()
@@ -166,11 +169,9 @@ export class StreamGateway
         }
     }
 
-    onRtcConnectionStateChanged(rtc: RTCPeerConnection, user: User) {
+    onRtcConnectionStateChanged(rtc: RTCPeerConnection, _user: User) {
         switch (rtc.connectionState) {
             case "connected":
-                this.logger.verbose(`${user.nickName} Started streaming`);
-                break;
             case "disconnected":
             case "closed":
             case "failed":
