@@ -39,6 +39,7 @@ export const UserSchema = new Schema(
         title: { type: String },
         secretKey: {
           type: String,
+          default: GenerateStreamKey(64)
         },
         live: { type: Boolean },
         chat: {

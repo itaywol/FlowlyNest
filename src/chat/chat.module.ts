@@ -21,6 +21,6 @@ import { ChatService } from './chat.service';
     }),
   ],
   providers: [ChatGateway, ChatConsumer, ChatProducer, ChatService],
-  exports: [ChatGateway, ChatService],
+  exports: [ChatService],
 })
 export class ChatModule {}
